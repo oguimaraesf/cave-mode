@@ -33,6 +33,7 @@
         .day-btn.completed { background-color: var(--success); color: #fff; }
         .day-btn.active { border: 2px solid var(--accent); }
         .task-item { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); }
+        .task-item:last-child { border-bottom: none; }
         .task-label { display: flex; align-items: center; gap: 10px; font-size: 0.95rem; cursor: pointer; }
         .task-label input { width: 18px; height: 18px; accent-color: var(--accent); cursor: pointer; }
         .btn-danger { background: none; border: none; color: var(--danger); cursor: pointer; font-size: 0.85rem; }
@@ -46,7 +47,7 @@
         .meal-input-group label { font-size: 0.8rem; color: var(--text-muted); font-weight: bold; }
         .meal-input-row { display: flex; gap: 4px; }
         .meal-input-row input { flex: 1; padding: 6px; border-radius: 6px; border: 1px solid var(--border); background: var(--card-bg); color: #fff; font-size: 0.85rem; text-align: right; }
-        .meal-input-row button { padding: 6px 10px; background-color: var(--success); color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 0.85rem; }
+        .meal-input-row button { padding: 6px 12px; background-color: var(--success); color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 0.9rem; }
         .meal-list { margin-top: 10px; font-size: 0.85rem; }
         .meal-item { background: var(--bg-color); padding: 8px; border-radius: 6px; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; }
         .calories-summary { background: var(--bg-color); padding: 12px; border-radius: 8px; margin-top: 12px; font-size: 0.9rem; border: 1px solid var(--border); }
@@ -90,11 +91,13 @@
         </div>
     </div>
 
+    <!-- Calendário 1 a 90 -->
     <div class="card">
         <h3>Calendário (Dias 1 a 90)</h3>
         <div class="grid" id="days-grid"></div>
     </div>
 
+    <!-- Tarefas e Controle Energético -->
     <div class="card">
         <h3 id="current-day-title">Dia 1 - Tarefas</h3>
         <div id="tasks-list" style="margin-top: 10px;"></div>
@@ -288,7 +291,7 @@
         }
 
         state.days[state.currentDay].meals.push({
-            description: category,
+            category: category,
             calories: calories
         });
 
@@ -325,6 +328,7 @@
     }
 
     function render() {
+        // Render Calendário 1 a 90
         const grid = document.getElementById('days-grid');
         if (!grid) return;
         grid.innerHTML = '';
@@ -352,6 +356,7 @@
 
         document.getElementById('current-day-title').innerText = `Dia ${state.currentDay} - Tarefas`;
         
+        // Render Tarefas Padrão
         const tasksList = document.getElementById('tasks-list');
         tasksList.innerHTML = '';
         const currentDayData = state.days[state.currentDay];
@@ -369,6 +374,7 @@
             tasksList.appendChild(div);
         });
 
+        // Render Refeições Adicionadas
         const mealList = document.getElementById('meal-list');
         mealList.innerHTML = '';
         let totalConsumed = 0;
@@ -378,7 +384,7 @@
             const div = document.createElement('div');
             div.className = 'meal-item';
             div.innerHTML = `
-                <span>🥗 ${meal.description}: <b>${meal.calories} kcal</b></span>
+                <span>🍽️ ${meal.category}: <b>${meal.calories} kcal</b></span>
                 <button class="btn-danger" onclick="removeMeal(${index})">Remover</button>
             `;
             mealList.appendChild(div);
