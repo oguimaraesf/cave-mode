@@ -329,7 +329,7 @@
         }
 
         const percent = Math.round((completedCount / TOTAL_DAYS) * 100);
-        document.getElementById('progress-text').innerText = `${completedCount} de${TOTAL_DAYS} dias concluídos`;
+        document.getElementById('progress-text').innerText = `${completedCount} de ${TOTAL_DAYS} dias concluídos`;
         document.getElementById('progress-percent').innerText = `${percent}%`;
         document.getElementById('progress-bar').style.width = `${percent}%`;
 
@@ -365,4 +365,48 @@
             const div = document.createElement('div');
             div.className = 'meal-item';
             div.innerHTML = `
-                <span>🍽️ ${meal
+                <span>🍽️ ${meal.description} (<b>${meal.calories} kcal</b>)</span>
+                <button class="btn-danger" onclick="removeMeal(${index})">Remover</button>
+            `;
+            mealList.appendChild(div);
+        });
+
+        document.getElementById('total-consumed').innerText = `${totalConsumed} kcal`;
+
+        // Garmin e Déficit (Hoje)
+        const garminVal = (currentDayData && currentDayData.garminCalories) ? currentDayData.garminCalories : 0;
+        if (updateInput) {
+            document.getElementById('garmin-input').value = garminVal > 0 ? garminVal : '';
+        }
+
+        const deficit = garminVal - totalConsumed;
+        const deficitEl = document.getElementById('total-deficit');
+        deficitEl.innerText = `${deficit > 0 ? '+' : ''}${deficit} kcal`;
+        deficitEl.style.color = deficit >= 0 ? 'var(--success)' : 'var(--danger)';
+
+        renderProjectTotals();
+    }
+
+    function exportData() {
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state));
+        const downloadAnchor = document.createElement('a');
+        downloadAnchor.setAttribute("href", dataStr);
+        downloadAnchor.setAttribute("download", "cave_mode_backup.json");
+        document.body.appendChild(downloadAnchor);
+        downloadAnchor.click();
+        downloadAnchor.remove();
+    }
+
+    function resetData() {
+        if(confirm("Tem certeza que deseja apagar todo o progresso?")) {
+            localStorage.removeItem('cave_mode_state');
+            location.reload();
+        }
+    }
+
+    initDays();
+    render();
+</script>
+
+</body>
+</html>
