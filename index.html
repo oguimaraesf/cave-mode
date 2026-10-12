@@ -44,4 +44,202 @@
         .btn-primary:hover { background-color: var(--accent-hover); }
         .meal-box { margin-top: 16px; padding-top: 16px; border-top: 1px dashed var(--border); }
         .meal-list { margin-top: 10px; font-size: 0.85rem; }
-        .meal-item { background: var(--
+        .meal-item { background: var(--bg-color); padding: 8px; border-radius: 6px; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; }
+        .meal-input-group { margin-top: 10px; display: flex; gap: 8px; }
+        .meal-input-group input[type="text"] { flex: 1; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background-color: var(--bg-color); color: var(--text-color); font-size: 0.9rem; }
+        .calories-summary { background: var(--bg-color); padding: 12px; border-radius: 8px; margin-top: 12px; font-size: 0.9rem; border: 1px solid var(--border); }
+        .cal-row { display: flex; justify-content: space-between; margin-bottom: 6px; align-items: center; }
+        .cal-row input { width: 100px; padding: 4px 8px; background: var(--card-bg); border: 1px solid var(--border); color: #fff; border-radius: 4px; text-align: right; }
+        .deficit-row { display: flex; justify-content: space-between; font-weight: bold; margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border); }
+        .settings-box { margin-bottom: 16px; font-size: 0.85rem; background: var(--bg-color); padding: 10px; border-radius: 8px; border: 1px solid var(--border); display: flex; gap: 8px; align-items: center; }
+        .settings-box input { flex: 1; padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border); background: var(--card-bg); color: #fff; font-size: 0.8rem; }
+        .actions-footer { display: flex; justify-content: space-between; margin-top: 20px; font-size: 0.85rem; }
+        .actions-footer button { background: none; border: none; color: var(--text-muted); text-decoration: underline; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Cave Mode</h1>
+        <p class="subtitle">Controle de 90 Dias</p>
+    </header>
+
+    <!-- Configuração Segura da API Key (Salva apenas no navegador) -->
+    <div class="settings-box">
+        <span style="color: var(--text-muted);">API Key:</span>
+        <input type="password" id="api-key-input" placeholder="Cole sua chave aqui">
+        <button class="btn-primary" style="padding: 6px 10px; font-size: 0.8rem;" onclick="saveApiKey()">Salvar Chave</button>
+    </div>
+
+    <div class="card">
+        <h3>Progresso Geral</h3>
+        <div style="display: flex; justify-content: space-between; margin-top: 8px; font-size: 0.85rem; color: var(--text-muted);">
+            <span id="progress-text">0 de 90 dias concluídos</span>
+            <span id="progress-percent">0%</span>
+        </div>
+        <div class="progress-container">
+            <div class="progress-bar" id="progress-bar"></div>
+        </div>
+
+        <div class="total-stats">
+            <div>
+                <span>Total Consumido (Proj.)</span>
+                <b id="project-total-consumed">0 kcal</b>
+            </div>
+            <div>
+                <span>Total Gasto Garmin (Proj.)</span>
+                <b id="project-total-garmin">0 kcal</b>
+            </div>
+            <div style="grid-column: span 2; border-top: 1px solid var(--border); padding-top: 6px; margin-top: 4px;">
+                <span>Déficit Calórico Total do Projeto</span>
+                <b id="project-total-deficit" style="font-size: 1rem; color: var(--success);">0 kcal</b>
+            </div>
+        </div>
+    </div>
+
+    <!-- Calendário 1 a 90 -->
+    <div class="card">
+        <h3>Calendário (Dias 1 a 90)</h3>
+        <div class="grid" id="days-grid"></div>
+    </div>
+
+    <!-- Tarefas e Refeições -->
+    <div class="card">
+        <h3 id="current-day-title">Dia 1 - Tarefas</h3>
+        <div id="tasks-list" style="margin-top: 10px;"></div>
+        
+        <div class="add-task-box">
+            <input type="text" id="new-task-input" placeholder="Nova tarefa (ex: Meditar 10 min)">
+            <button class="btn-primary" onclick="addTask()">Adicionar</button>
+        </div>
+
+        <div class="meal-box">
+            <h4>Controle Energético & Dieta (IA)</h4>
+            
+            <div class="meal-input-group">
+                <input type="text" id="meal-text-input" placeholder="Ex: 150g arroz, 120g frango, azeite">
+                <button class="btn-primary" style="background-color: #10b981;" onclick="analyzeMealText()">🤖 Calcular</button>
+            </div>
+            <div id="meal-loading" style="text-align: center; color: var(--text-muted); font-size: 0.85rem; margin-top: 8px; display: none;">Calculando calorias com IA...</div>
+            
+            <div class="meal-list" id="meal-list"></div>
+
+            <div class="calories-summary">
+                <div class="cal-row">
+                    <span>Total Consumido (Hoje):</span>
+                    <span id="total-consumed">0 kcal</span>
+                </div>
+                <div class="cal-row" style="align-items: center;">
+                    <span>Gasto Garmin (Hoje):</span>
+                    <input type="number" id="garmin-input" placeholder="Ex: 2800" oninput="updateGarminCalories(this.value)">
+                </div>
+                <div class="deficit-row">
+                    <span>Déficit / Saldo (Hoje):</span>
+                    <span id="total-deficit" style="color: var(--success);">0 kcal</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="actions-footer">
+        <button onclick="exportData()">Exportar Backup</button>
+        <button onclick="resetData()" style="color: var(--danger);">Reiniciar Tudo</button>
+    </div>
+
+<script>
+    const TOTAL_DAYS = 90;
+    const DEFAULT_TASKS = [
+        "Leitura (mín. 10 pág.)",
+        "Atividade física / Treino",
+        "TRT/TPC / Suplementação",
+        "Mudança Mental: Músicas / Podcasts / Vídeos",
+        "Dieta: Quebrando a compulsão alimentar"
+    ];
+
+    let state = JSON.parse(localStorage.getItem('cave_mode_state')) || {
+        currentDay: 1,
+        days: {}
+    };
+
+    function initDays() {
+        if (!state.days) state.days = {};
+        for (let i = 1; i <= TOTAL_DAYS; i++) {
+            if (!state.days[i]) {
+                state.days[i] = {
+                    completed: false,
+                    tasks: DEFAULT_TASKS.map(t => ({ text: t, done: false })),
+                    meals: [],
+                    garminCalories: 0
+                };
+            } else {
+                if (!state.days[i].tasks || !Array.isArray(state.days[i].tasks) || state.days[i].tasks.length === 0) {
+                    state.days[i].tasks = DEFAULT_TASKS.map(t => ({ text: t, done: false }));
+                }
+                if (!state.days[i].meals) {
+                    state.days[i].meals = [];
+                }
+            }
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        const savedKey = localStorage.getItem('cave_gemini_key');
+        if (savedKey) {
+            document.getElementById('api-key-input').value = savedKey;
+        }
+        initDays();
+        render();
+    });
+
+    function saveApiKey() {
+        const keyVal = document.getElementById('api-key-input').value.trim();
+        if (!keyVal) {
+            alert("Digite uma chave válida.");
+            return;
+        }
+        localStorage.setItem('cave_gemini_key', keyVal);
+        alert("Chave de API salva com segurança no seu navegador!");
+    }
+
+    function saveState() {
+        localStorage.setItem('cave_mode_state', JSON.stringify(state));
+        render();
+    }
+
+    function selectDay(day) {
+        state.currentDay = day;
+        saveState();
+    }
+
+    function toggleTask(index) {
+        const dayData = state.days[state.currentDay];
+        if (!dayData || !dayData.tasks[index]) return;
+        dayData.tasks[index].done = !dayData.tasks[index].done;
+        dayData.completed = dayData.tasks.length > 0 && dayData.tasks.every(t => t.done);
+        saveState();
+    }
+
+    function addTask() {
+        const input = document.getElementById('new-task-input');
+        const text = input.value.trim();
+        if(!text) return;
+
+        if (!state.days[state.currentDay].tasks) {
+            state.days[state.currentDay].tasks = [];
+        }
+        state.days[state.currentDay].tasks.push({ text: text, done: false });
+        input.value = '';
+        saveState();
+    }
+
+    function removeTask(index) {
+        state.days[state.currentDay].tasks.splice(index, 1);
+        const dayData = state.days[state.currentDay];
+        dayData.completed = dayData.tasks.length > 0 && dayData.tasks.every(t => t.done);
+        saveState();
+    }
+
+    function updateGarminCalories(val) {
+        state.days[state.currentDay].garminCalories = Number(val) || 0;
+        saveState(false);
+        render
