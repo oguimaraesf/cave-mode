@@ -45,8 +45,8 @@
         .meal-box { margin-top: 16px; padding-top: 16px; border-top: 1px dashed var(--border); }
         .meal-list { margin-top: 10px; font-size: 0.85rem; }
         .meal-item { background: var(--bg-color); padding: 8px; border-radius: 6px; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; }
-        .meal-input-group { margin-top: 10px; display: flex; flex-direction: column; gap: 8px; }
-        .meal-input-group input[type="text"] { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background-color: var(--bg-color); color: var(--text-color); font-size: 0.9rem; }
+        .meal-input-group { margin-top: 10px; display: flex; gap: 8px; }
+        .meal-input-group input[type="text"] { flex: 1; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background-color: var(--bg-color); color: var(--text-color); font-size: 0.9rem; }
         .calories-summary { background: var(--bg-color); padding: 12px; border-radius: 8px; margin-top: 12px; font-size: 0.9rem; border: 1px solid var(--border); }
         .cal-row { display: flex; justify-content: space-between; margin-bottom: 6px; align-items: center; }
         .cal-row input { width: 100px; padding: 4px 8px; background: var(--card-bg); border: 1px solid var(--border); color: #fff; border-radius: 4px; text-align: right; }
@@ -103,14 +103,13 @@
         </div>
 
         <div class="meal-box">
-            <h4>Controle Energético & IA Dieta</h4>
+            <h4>Controle Energético & Dieta (IA)</h4>
             
             <div class="meal-input-group">
-                <input type="text" id="meal-notes-input" placeholder="Ex: 150g arroz, 120g frango (opcional)">
-                <input type="file" id="meal-photo-input" accept="image/*" capture="environment" style="display: none;" onchange="handleMealPhoto(event)">
-                <button class="btn-primary" style="width: 100%; background-color: #10b981;" onclick="document.getElementById('meal-photo-input').click()">📷 Enviar Foto do Prato</button>
+                <input type="text" id="meal-text-input" placeholder="Ex: 150g arroz, 120g frango, azeite">
+                <button class="btn-primary" style="background-color: #10b981;" onclick="analyzeMealText()">🤖 Calcular</button>
             </div>
-            <div id="meal-loading" style="text-align: center; color: var(--text-muted); font-size: 0.85rem; margin-top: 8px; display: none;">Analisando prato com IA...</div>
+            <div id="meal-loading" style="text-align: center; color: var(--text-muted); font-size: 0.85rem; margin-top: 8px; display: none;">Calculando calorias com IA...</div>
             
             <div class="meal-list" id="meal-list"></div>
 
@@ -163,7 +162,6 @@
                     garminCalories: 0
                 };
             } else {
-                // Migração defensiva: garante que dias já salvos tenham tarefas e refeições válidas
                 if (!state.days[i].tasks || !Array.isArray(state.days[i].tasks) || state.days[i].tasks.length === 0) {
                     state.days[i].tasks = DEFAULT_TASKS.map(t => ({ text: t, done: false }));
                 }
@@ -215,27 +213,22 @@
         renderProjectTotals();
     }
 
-    async function handleMealPhoto(event) {
-        const file = event.target.files[0];
-        if (!file) return;
-
-        const notesInput = document.getElementById('meal-notes-input');
-        const userNotes = notesInput.value.trim();
+    async function analyzeMealText() {
+        const textInput = document.getElementById('meal-text-input');
+        const mealDescription = textInput.value.trim();
+        if (!mealDescription) {
+            alert("Digite os itens ou pesos da refeição.");
+            return;
+        }
 
         const loading = document.getElementById('meal-loading');
         loading.style.display = 'block';
 
-        const base64Image = await fileToBase64(file);
-        const base64Data = base64Image.split(',')[1];
-
-        let promptText = "Analise esta foto de comida e retorne estritamente um objeto JSON com duas chaves: 'description' (uma breve descrição dos alimentos em português) e 'calories' (número inteiro estimado de calorias totais do prato). Exemplo: {\"description\": \"Arroz, feijão e frango grelhado\", \"calories\": 520}";
-        if (userNotes) {
-            promptText += ` Leve em consideração estes pesos/informações fornecidos pelo usuário sobre os alimentos: "${userNotes}".`;
-        }
-
         let success = false;
         let attempts = 0;
         const maxAttempts = 3;
+
+        let promptText = `Analise os seguintes alimentos descritos pelo usuário e retorne estritamente um objeto JSON com duas chaves: 'description' (o nome/resumo dos alimentos em português de forma limpa) e 'calories' (número inteiro estimado de calorias totais). Descrição: "${mealDescription}". Exemplo de formato: {"description": "150g arroz, 120g frango", "calories": 450}`;
 
         while (!success && attempts < maxAttempts) {
             attempts++;
@@ -245,10 +238,7 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         contents: [{
-                            parts: [
-                                { text: promptText },
-                                { inline_data: { mime_type: file.type, data: base64Data } }
-                            ]
+                            parts: [{ text: promptText }]
                         }]
                     })
                 });
@@ -257,10 +247,10 @@
                 
                 if (data.error) {
                     if (attempts < maxAttempts) {
-                        await new Promise(r => setTimeout(r, 2000 * attempts));
+                        await new Promise(r => setTimeout(r, 1500 * attempts));
                         continue;
                     } else {
-                        alert("Servidor ocupado (alta demanda). Tente novamente em alguns segundos.");
+                        alert("Erro da API: " + data.error.message);
                         break;
                     }
                 }
@@ -270,11 +260,11 @@
                 const mealInfo = JSON.parse(cleanJson);
 
                 state.days[state.currentDay].meals.push({
-                    description: userNotes ? `${mealInfo.description} (${userNotes})` : mealInfo.description,
-                    calories: Number(mealInfo.calories)
+                    description: mealInfo.description || mealDescription,
+                    calories: Number(mealInfo.calories) || 0
                 });
 
-                notesInput.value = '';
+                textInput.value = '';
                 saveState();
                 success = true;
             } catch (error) {
@@ -282,22 +272,12 @@
                     console.error(error);
                     alert("Erro ao conectar com a API do Gemini. Tente novamente.");
                 } else {
-                    await new Promise(r => setTimeout(r, 2000));
+                    await new Promise(r => setTimeout(r, 1500));
                 }
             }
         }
 
         loading.style.display = 'none';
-        event.target.value = '';
-    }
-
-    function fileToBase64(file) {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = () => resolve(reader.result);
-            reader.onerror = error => reject(error);
-        });
     }
 
     function removeMeal(index) {
@@ -349,7 +329,7 @@
         }
 
         const percent = Math.round((completedCount / TOTAL_DAYS) * 100);
-        document.getElementById('progress-text').innerText = `${completedCount} de ${TOTAL_DAYS} dias concluídos`;
+        document.getElementById('progress-text').innerText = `${completedCount} de${TOTAL_DAYS} dias concluídos`;
         document.getElementById('progress-percent').innerText = `${percent}%`;
         document.getElementById('progress-bar').style.width = `${percent}%`;
 
@@ -385,48 +365,4 @@
             const div = document.createElement('div');
             div.className = 'meal-item';
             div.innerHTML = `
-                <span>🍽️ ${meal.description} (<b>${meal.calories} kcal</b>)</span>
-                <button class="btn-danger" onclick="removeMeal(${index})">Remover</button>
-            `;
-            mealList.appendChild(div);
-        });
-
-        document.getElementById('total-consumed').innerText = `${totalConsumed} kcal`;
-
-        // Garmin e Déficit (Hoje)
-        const garminVal = (currentDayData && currentDayData.garminCalories) ? currentDayData.garminCalories : 0;
-        if (updateInput) {
-            document.getElementById('garmin-input').value = garminVal > 0 ? garminVal : '';
-        }
-
-        const deficit = garminVal - totalConsumed;
-        const deficitEl = document.getElementById('total-deficit');
-        deficitEl.innerText = `${deficit > 0 ? '+' : ''}${deficit} kcal`;
-        deficitEl.style.color = deficit >= 0 ? 'var(--success)' : 'var(--danger)';
-
-        renderProjectTotals();
-    }
-
-    function exportData() {
-        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state));
-        const downloadAnchor = document.createElement('a');
-        downloadAnchor.setAttribute("href", dataStr);
-        downloadAnchor.setAttribute("download", "cave_mode_backup.json");
-        document.body.appendChild(downloadAnchor);
-        downloadAnchor.click();
-        downloadAnchor.remove();
-    }
-
-    function resetData() {
-        if(confirm("Tem certeza que deseja apagar todo o progresso?")) {
-            localStorage.removeItem('cave_mode_state');
-            location.reload();
-        }
-    }
-
-    initDays();
-    render();
-</script>
-
-</body>
-</html>
+                <span>🍽️ ${meal
