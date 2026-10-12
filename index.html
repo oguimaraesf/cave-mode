@@ -42,14 +42,14 @@
         .btn-primary { background-color: var(--accent); color: white; border: none; border-radius: 8px; padding: 10px 16px; font-weight: bold; cursor: pointer; }
         .btn-primary:hover { background-color: var(--accent-hover); }
         .meal-box { margin-top: 16px; padding-top: 16px; border-top: 1px dashed var(--border); }
-        .meal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
-        .meal-input-group { background: var(--bg-color); padding: 8px; border-radius: 8px; border: 1px solid var(--border); display: flex; flex-direction: column; gap: 4px; }
-        .meal-input-group label { font-size: 0.8rem; color: var(--text-muted); font-weight: bold; }
-        .meal-input-row { display: flex; gap: 4px; }
-        .meal-input-row input { flex: 1; padding: 6px; border-radius: 6px; border: 1px solid var(--border); background: var(--card-bg); color: #fff; font-size: 0.85rem; text-align: right; }
+        .meal-stack { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+        .meal-input-group { background: var(--bg-color); padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+        .meal-input-group label { font-size: 0.9rem; color: var(--text-color); font-weight: 500; }
+        .meal-input-row { display: flex; gap: 8px; align-items: center; width: 160px; }
+        .meal-input-row input { width: 90px; padding: 6px 8px; border-radius: 6px; border: 1px solid var(--border); background: var(--card-bg); color: #fff; font-size: 0.85rem; text-align: right; }
         .meal-input-row button { padding: 6px 12px; background-color: var(--success); color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 0.9rem; }
-        .meal-list { margin-top: 10px; font-size: 0.85rem; }
-        .meal-item { background: var(--bg-color); padding: 8px; border-radius: 6px; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; }
+        .meal-list { margin-top: 12px; font-size: 0.85rem; }
+        .meal-item { background: var(--bg-color); padding: 8px 12px; border-radius: 6px; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--border); }
         .calories-summary { background: var(--bg-color); padding: 12px; border-radius: 8px; margin-top: 12px; font-size: 0.9rem; border: 1px solid var(--border); }
         .cal-row { display: flex; justify-content: space-between; margin-bottom: 6px; align-items: center; }
         .cal-row input { width: 100px; padding: 4px 8px; background: var(--card-bg); border: 1px solid var(--border); color: #fff; border-radius: 4px; text-align: right; }
@@ -97,7 +97,7 @@
         <div class="grid" id="days-grid"></div>
     </div>
 
-    <!-- Tarefas e Controle Energético -->
+    <!-- Tarefas e Calorias -->
     <div class="card">
         <h3 id="current-day-title">Dia 1 - Tarefas</h3>
         <div id="tasks-list" style="margin-top: 10px;"></div>
@@ -108,9 +108,9 @@
         </div>
 
         <div class="meal-box">
-            <h4>Controle Energético Diário</h4>
+            <h4>Calorias</h4>
             
-            <div class="meal-grid">
+            <div class="meal-stack">
                 <div class="meal-input-group">
                     <label>Café da Manhã</label>
                     <div class="meal-input-row">
@@ -153,7 +153,7 @@
                         <button onclick="addMeal('Janta', 'input-janta')">+</button>
                     </div>
                 </div>
-                <div class="meal-input-group" style="grid-column: span 2;">
+                <div class="meal-input-group">
                     <label>Outros</label>
                     <div class="meal-input-row">
                         <input type="number" id="input-outros" placeholder="kcal">
@@ -328,7 +328,6 @@
     }
 
     function render() {
-        // Render Calendário 1 a 90
         const grid = document.getElementById('days-grid');
         if (!grid) return;
         grid.innerHTML = '';
@@ -356,7 +355,6 @@
 
         document.getElementById('current-day-title').innerText = `Dia ${state.currentDay} - Tarefas`;
         
-        // Render Tarefas Padrão
         const tasksList = document.getElementById('tasks-list');
         tasksList.innerHTML = '';
         const currentDayData = state.days[state.currentDay];
@@ -374,7 +372,6 @@
             tasksList.appendChild(div);
         });
 
-        // Render Refeições Adicionadas
         const mealList = document.getElementById('meal-list');
         mealList.innerHTML = '';
         let totalConsumed = 0;
