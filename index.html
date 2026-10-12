@@ -73,7 +73,6 @@
             <div class="progress-bar" id="progress-bar"></div>
         </div>
 
-        <!-- Resumo Acumulado do Projeto -->
         <div class="total-stats">
             <div>
                 <span>Total Consumido (Proj.)</span>
@@ -104,7 +103,6 @@
             <button class="btn-primary" onclick="addTask()">Adicionar</button>
         </div>
 
-        <!-- Seção de Dieta Escrita & Calorias -->
         <div class="meal-box">
             <h4>Controle Energético & Dieta</h4>
             
@@ -327,6 +325,7 @@
         deficitEl.innerText = `${deficit > 0 ? '+' : ''}${deficit} kcal`;
         deficitEl.style.color = deficit >= 0 ? 'var(--success)' : 'var(--danger)';
 
+        // Totais Gerais
         renderProjectTotals();
     }
 
