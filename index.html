@@ -380,4 +380,25 @@
     }
 
     function exportData() {
-        const dataStr = "data:text/json
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state));
+        const downloadAnchor = document.createElement('a');
+        downloadAnchor.setAttribute("href", dataStr);
+        downloadAnchor.setAttribute("download", "cave_mode_backup.json");
+        document.body.appendChild(downloadAnchor);
+        downloadAnchor.click();
+        downloadAnchor.remove();
+    }
+
+    function resetData() {
+        if(confirm("Tem certeza que deseja apagar todo o progresso?")) {
+            localStorage.removeItem('cave_mode_state');
+            location.reload();
+        }
+    }
+
+    initDays();
+    render();
+</script>
+
+</body>
+</html>
