@@ -41,13 +41,16 @@
         .add-task-box input { flex: 1; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background-color: var(--bg-color); color: var(--text-color); font-size: 0.9rem; }
         .btn-primary { background-color: var(--accent); color: white; border: none; border-radius: 8px; padding: 10px 16px; font-weight: bold; cursor: pointer; }
         .btn-primary:hover { background-color: var(--accent-hover); }
+        
         .meal-box { margin-top: 16px; padding-top: 16px; border-top: 1px dashed var(--border); }
-        .meal-stack { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
-        .meal-input-group { background: var(--bg-color); padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
-        .meal-input-group label { font-size: 0.9rem; color: var(--text-color); font-weight: 500; }
-        .meal-input-row { display: flex; gap: 8px; align-items: center; width: 160px; }
-        .meal-input-row input { width: 90px; padding: 6px 8px; border-radius: 6px; border: 1px solid var(--border); background: var(--card-bg); color: #fff; font-size: 0.85rem; text-align: right; }
-        .meal-input-row button { padding: 6px 12px; background-color: var(--success); color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 0.9rem; }
+        /* Layout vertical: uma caixinha embaixo da outra em linha completa */
+        .meal-stack { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
+        .meal-input-group { background: var(--bg-color); padding: 10px 14px; border-radius: 8px; border: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; width: 100%; }
+        .meal-input-group label { font-size: 0.95rem; color: var(--text-color); font-weight: 500; }
+        .meal-input-row { display: flex; gap: 8px; align-items: center; }
+        .meal-input-row input { width: 110px; padding: 8px; border-radius: 6px; border: 1px solid var(--border); background: var(--card-bg); color: #fff; font-size: 0.9rem; text-align: right; }
+        .meal-input-row button { padding: 8px 16px; background-color: var(--success); color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 1rem; }
+        
         .meal-list { margin-top: 12px; font-size: 0.85rem; }
         .meal-item { background: var(--bg-color); padding: 8px 12px; border-radius: 6px; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--border); }
         .calories-summary { background: var(--bg-color); padding: 12px; border-radius: 8px; margin-top: 12px; font-size: 0.9rem; border: 1px solid var(--border); }
