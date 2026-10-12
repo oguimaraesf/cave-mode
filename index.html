@@ -110,7 +110,7 @@
                 <input type="file" id="meal-photo-input" accept="image/*" capture="environment" style="display: none;" onchange="handleMealPhoto(event)">
                 <button class="btn-primary" style="width: 100%; background-color: #10b981;" onclick="document.getElementById('meal-photo-input').click()">📷 Enviar Foto do Prato</button>
             </div>
-            <div id="meal-loading" style="text-align: center; color: var(--text-muted); font-size: 0.85rem; margin-top: 8px; display: none;">Servidor em alta demanda, tentando novamente em instantes...</div>
+            <div id="meal-loading" style="text-align: center; color: var(--text-muted); font-size: 0.85rem; margin-top: 8px; display: none;">Analisando prato com IA...</div>
             
             <div class="meal-list" id="meal-list"></div>
 
@@ -162,6 +162,14 @@
                     meals: [],
                     garminCalories: 0
                 };
+            } else {
+                // Migração defensiva: garante que dias já salvos tenham tarefas e refeições válidas
+                if (!state.days[i].tasks || !Array.isArray(state.days[i].tasks) || state.days[i].tasks.length === 0) {
+                    state.days[i].tasks = DEFAULT_TASKS.map(t => ({ text: t, done: false }));
+                }
+                if (!state.days[i].meals) {
+                    state.days[i].meals = [];
+                }
             }
         }
     }
@@ -178,6 +186,7 @@
 
     function toggleTask(index) {
         const dayData = state.days[state.currentDay];
+        if (!dayData.tasks[index]) return;
         dayData.tasks[index].done = !dayData.tasks[index].done;
         dayData.completed = dayData.tasks.length > 0 && dayData.tasks.every(t => t.done);
         saveState();
@@ -246,10 +255,9 @@
 
                 const data = await response.json();
                 
-                // Se der erro de alta demanda (status 503 ou mensagem), aguarda e tenta de novo
                 if (data.error) {
                     if (attempts < maxAttempts) {
-                        await new Promise(r => setTimeout(r, 2000 * attempts)); // Espera 2s, depois 4s...
+                        await new Promise(r => setTimeout(r, 2000 * attempts));
                         continue;
                     } else {
                         alert("Servidor ocupado (alta demanda). Tente novamente em alguns segundos.");
@@ -328,7 +336,7 @@
         for (let i = 1; i <= TOTAL_DAYS; i++) {
             const btn = document.createElement('button');
             btn.className = 'day-btn';
-            if (state.days[i].completed) {
+            if (state.days[i] && state.days[i].completed) {
                 btn.classList.add('completed');
                 completedCount++;
             }
@@ -350,7 +358,8 @@
         // Render Tarefas
         const tasksList = document.getElementById('tasks-list');
         tasksList.innerHTML = '';
-        const currentTasks = state.days[state.currentDay].tasks;
+        const currentDayData = state.days[state.currentDay];
+        const currentTasks = (currentDayData && currentDayData.tasks) ? currentDayData.tasks : DEFAULT_TASKS.map(t => ({ text: t, done: false }));
         
         currentTasks.forEach((task, index) => {
             const div = document.createElement('div');
@@ -368,7 +377,7 @@
         // Render Refeições
         const mealList = document.getElementById('meal-list');
         mealList.innerHTML = '';
-        const currentMeals = state.days[state.currentDay].meals || [];
+        const currentMeals = (currentDayData && currentDayData.meals) ? currentDayData.meals : [];
         let totalConsumed = 0;
 
         currentMeals.forEach((meal, index) => {
@@ -385,7 +394,7 @@
         document.getElementById('total-consumed').innerText = `${totalConsumed} kcal`;
 
         // Garmin e Déficit (Hoje)
-        const garminVal = state.days[state.currentDay].garminCalories || 0;
+        const garminVal = (currentDayData && currentDayData.garminCalories) ? currentDayData.garminCalories : 0;
         if (updateInput) {
             document.getElementById('garmin-input').value = garminVal > 0 ? garminVal : '';
         }
