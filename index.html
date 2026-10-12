@@ -39,17 +39,20 @@
         .add-task-box { display: flex; gap: 8px; margin-top: 12px; }
         .add-task-box input { flex: 1; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background-color: var(--bg-color); color: var(--text-color); font-size: 0.9rem; }
         .btn-primary { background-color: var(--accent); color: white; border: none; border-radius: 8px; padding: 10px 16px; font-weight: bold; cursor: pointer; }
+        .btn-primary:hover { background-color: var(--accent-hover); }
         .meal-box { margin-top: 16px; padding-top: 16px; border-top: 1px dashed var(--border); }
+        .meal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+        .meal-input-group { background: var(--bg-color); padding: 8px; border-radius: 8px; border: 1px solid var(--border); display: flex; flex-direction: column; gap: 4px; }
+        .meal-input-group label { font-size: 0.8rem; color: var(--text-muted); font-weight: bold; }
+        .meal-input-row { display: flex; gap: 4px; }
+        .meal-input-row input { flex: 1; padding: 6px; border-radius: 6px; border: 1px solid var(--border); background: var(--card-bg); color: #fff; font-size: 0.85rem; text-align: right; }
+        .meal-input-row button { padding: 6px 10px; background-color: var(--success); color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 0.85rem; }
         .meal-list { margin-top: 10px; font-size: 0.85rem; }
         .meal-item { background: var(--bg-color); padding: 8px; border-radius: 6px; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; }
-        .meal-input-group { margin-top: 10px; display: flex; gap: 8px; }
-        .meal-input-group input[type="text"] { flex: 1; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background-color: var(--bg-color); color: var(--text-color); font-size: 0.9rem; }
         .calories-summary { background: var(--bg-color); padding: 12px; border-radius: 8px; margin-top: 12px; font-size: 0.9rem; border: 1px solid var(--border); }
         .cal-row { display: flex; justify-content: space-between; margin-bottom: 6px; align-items: center; }
         .cal-row input { width: 100px; padding: 4px 8px; background: var(--card-bg); border: 1px solid var(--border); color: #fff; border-radius: 4px; text-align: right; }
         .deficit-row { display: flex; justify-content: space-between; font-weight: bold; margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border); }
-        .settings-box { margin-bottom: 16px; font-size: 0.85rem; background: var(--bg-color); padding: 10px; border-radius: 8px; border: 1px solid var(--border); display: flex; gap: 8px; align-items: center; }
-        .settings-box input { flex: 1; padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border); background: var(--card-bg); color: #fff; font-size: 0.8rem; }
         .actions-footer { display: flex; justify-content: space-between; margin-top: 20px; font-size: 0.85rem; }
         .actions-footer button { background: none; border: none; color: var(--text-muted); text-decoration: underline; cursor: pointer; }
     </style>
@@ -60,12 +63,6 @@
         <h1>Cave Mode</h1>
         <p class="subtitle">Controle de 90 Dias</p>
     </header>
-
-    <div class="settings-box">
-        <span style="color: var(--text-muted);">API Key:</span>
-        <input type="password" id="api-key-input" placeholder="Cole sua chave aqui">
-        <button class="btn-primary" style="padding: 6px 10px; font-size: 0.8rem;" onclick="saveApiKey()">Salvar Chave</button>
-    </div>
 
     <div class="card">
         <h3>Progresso Geral</h3>
@@ -108,13 +105,59 @@
         </div>
 
         <div class="meal-box">
-            <h4>Controle Energético & Dieta (IA)</h4>
+            <h4>Controle Energético Diário</h4>
             
-            <div class="meal-input-group">
-                <input type="text" id="meal-text-input" placeholder="Ex: 150g arroz, 120g frango, azeite">
-                <button class="btn-primary" style="background-color: #10b981;" onclick="analyzeMealText()">🤖 Calcular</button>
+            <div class="meal-grid">
+                <div class="meal-input-group">
+                    <label>Café da Manhã</label>
+                    <div class="meal-input-row">
+                        <input type="number" id="input-cafe-manha" placeholder="kcal">
+                        <button onclick="addMeal('Café da Manhã', 'input-cafe-manha')">+</button>
+                    </div>
+                </div>
+                <div class="meal-input-group">
+                    <label>Lanche da Manhã</label>
+                    <div class="meal-input-row">
+                        <input type="number" id="input-lanche-manha" placeholder="kcal">
+                        <button onclick="addMeal('Lanche da Manhã', 'input-lanche-manha')">+</button>
+                    </div>
+                </div>
+                <div class="meal-input-group">
+                    <label>Almoço</label>
+                    <div class="meal-input-row">
+                        <input type="number" id="input-almoco" placeholder="kcal">
+                        <button onclick="addMeal('Almoço', 'input-almoco')">+</button>
+                    </div>
+                </div>
+                <div class="meal-input-group">
+                    <label>Sobremesa</label>
+                    <div class="meal-input-row">
+                        <input type="number" id="input-sobremesa" placeholder="kcal">
+                        <button onclick="addMeal('Sobremesa', 'input-sobremesa')">+</button>
+                    </div>
+                </div>
+                <div class="meal-input-group">
+                    <label>Café da Tarde</label>
+                    <div class="meal-input-row">
+                        <input type="number" id="input-cafe-tarde" placeholder="kcal">
+                        <button onclick="addMeal('Café da Tarde', 'input-cafe-tarde')">+</button>
+                    </div>
+                </div>
+                <div class="meal-input-group">
+                    <label>Janta</label>
+                    <div class="meal-input-row">
+                        <input type="number" id="input-janta" placeholder="kcal">
+                        <button onclick="addMeal('Janta', 'input-janta')">+</button>
+                    </div>
+                </div>
+                <div class="meal-input-group" style="grid-column: span 2;">
+                    <label>Outros</label>
+                    <div class="meal-input-row">
+                        <input type="number" id="input-outros" placeholder="kcal">
+                        <button onclick="addMeal('Outros', 'input-outros')">+</button>
+                    </div>
+                </div>
             </div>
-            <div id="meal-loading" style="text-align: center; color: var(--text-muted); font-size: 0.85rem; margin-top: 8px; display: none;">Calculando calorias com IA...</div>
             
             <div class="meal-list" id="meal-list"></div>
 
@@ -210,4 +253,170 @@
     }
 
     function addTask() {
-        const input = document.
+        const input = document.getElementById('new-task-input');
+        const text = input.value.trim();
+        if (!text) return;
+
+        state.days[state.currentDay].tasks.push({ text: text, done: false });
+        input.value = '';
+        saveState();
+    }
+
+    function removeTask(index) {
+        const dayData = state.days[state.currentDay];
+        dayData.tasks.splice(index, 1);
+        dayData.completed = dayData.tasks.length > 0 && dayData.tasks.every(t => t.done);
+        saveState();
+    }
+
+    function updateGarminCalories(val) {
+        state.days[state.currentDay].garminCalories = Number(val) || 0;
+        localStorage.setItem('cave_mode_state', JSON.stringify(state));
+        renderProjectTotals();
+    }
+
+    function addMeal(category, inputId) {
+        const inputEl = document.getElementById(inputId);
+        const calories = Number(inputEl.value);
+        if (!calories || calories <= 0) {
+            alert("Insira um valor válido de calorias.");
+            return;
+        }
+
+        if (!state.days[state.currentDay].meals) {
+            state.days[state.currentDay].meals = [];
+        }
+
+        state.days[state.currentDay].meals.push({
+            description: category,
+            calories: calories
+        });
+
+        inputEl.value = '';
+        saveState();
+    }
+
+    function removeMeal(index) {
+        state.days[state.currentDay].meals.splice(index, 1);
+        saveState();
+    }
+
+    function renderProjectTotals() {
+        let totalConsumedProj = 0;
+        let totalGarminProj = 0;
+
+        for (let i = 1; i <= TOTAL_DAYS; i++) {
+            const day = state.days[i];
+            if (day) {
+                const consumed = (day.meals || []).reduce((acc, m) => acc + m.calories, 0);
+                totalConsumedProj += consumed;
+                totalGarminProj += (day.garminCalories || 0);
+            }
+        }
+
+        const deficitProj = totalGarminProj - totalConsumedProj;
+
+        document.getElementById('project-total-consumed').innerText = `${totalConsumedProj} kcal`;
+        document.getElementById('project-total-garmin').innerText = `${totalGarminProj} kcal`;
+        
+        const defProjEl = document.getElementById('project-total-deficit');
+        defProjEl.innerText = `${deficitProj > 0 ? '+' : ''}${deficitProj} kcal`;
+        defProjEl.style.color = deficitProj >= 0 ? 'var(--success)' : 'var(--danger)';
+    }
+
+    function render() {
+        const grid = document.getElementById('days-grid');
+        if (!grid) return;
+        grid.innerHTML = '';
+        let completedCount = 0;
+
+        for (let i = 1; i <= TOTAL_DAYS; i++) {
+            const btn = document.createElement('button');
+            btn.className = 'day-btn';
+            if (state.days[i] && state.days[i].completed) {
+                btn.classList.add('completed');
+                completedCount++;
+            }
+            if (i === state.currentDay) {
+                btn.classList.add('active');
+            }
+            btn.innerText = i;
+            btn.onclick = () => selectDay(i);
+            grid.appendChild(btn);
+        }
+
+        const percent = Math.round((completedCount / TOTAL_DAYS) * 100);
+        document.getElementById('progress-text').innerText = `${completedCount} de ${TOTAL_DAYS} dias concluídos`;
+        document.getElementById('progress-percent').innerText = `${percent}%`;
+        document.getElementById('progress-bar').style.width = `${percent}%`;
+
+        document.getElementById('current-day-title').innerText = `Dia ${state.currentDay} - Tarefas`;
+        
+        const tasksList = document.getElementById('tasks-list');
+        tasksList.innerHTML = '';
+        const currentDayData = state.days[state.currentDay];
+        
+        currentDayData.tasks.forEach((task, index) => {
+            const div = document.createElement('div');
+            div.className = 'task-item';
+            div.innerHTML = `
+                <label class="task-label">
+                    <input type="checkbox" ${task.done ? 'checked' : ''} onchange="toggleTask(${index})">
+                    <span style="${task.done ? 'text-decoration: line-through; color: var(--text-muted);' : ''}">${task.text}</span>
+                </label>
+                <button class="btn-danger" onclick="removeTask(${index})">Excluir</button>
+            `;
+            tasksList.appendChild(div);
+        });
+
+        const mealList = document.getElementById('meal-list');
+        mealList.innerHTML = '';
+        let totalConsumed = 0;
+
+        currentDayData.meals.forEach((meal, index) => {
+            totalConsumed += meal.calories;
+            const div = document.createElement('div');
+            div.className = 'meal-item';
+            div.innerHTML = `
+                <span>🥗 ${meal.description}: <b>${meal.calories} kcal</b></span>
+                <button class="btn-danger" onclick="removeMeal(${index})">Remover</button>
+            `;
+            mealList.appendChild(div);
+        });
+
+        document.getElementById('total-consumed').innerText = `${totalConsumed} kcal`;
+        document.getElementById('garmin-input').value = currentDayData.garminCalories > 0 ? currentDayData.garminCalories : '';
+
+        const deficit = currentDayData.garminCalories - totalConsumed;
+        const deficitEl = document.getElementById('total-deficit');
+        deficitEl.innerText = `${deficit > 0 ? '+' : ''}${deficit} kcal`;
+        deficitEl.style.color = deficit >= 0 ? 'var(--success)' : 'var(--danger)';
+
+        renderProjectTotals();
+    }
+
+    function exportData() {
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state));
+        const downloadAnchor = document.createElement('a');
+        downloadAnchor.setAttribute("href", dataStr);
+        downloadAnchor.setAttribute("download", "cave_mode_backup.json");
+        document.body.appendChild(downloadAnchor);
+        downloadAnchor.click();
+        downloadAnchor.remove();
+    }
+
+    function resetData() {
+        if(confirm("Deseja apagar todo o progresso e reiniciar?")) {
+            localStorage.removeItem('cave_mode_state');
+            location.reload();
+        }
+    }
+
+    window.onload = function() {
+        initAppState();
+        render();
+    };
+</script>
+
+</body>
+</html>
