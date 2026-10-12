@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cave Mode - 90 Dias</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-color: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent: #3b82f6;
+            --accent-hover: #2563eb;
+            --success: #22c55e;
+            --border: #334155;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text-color); padding: 16px; max-width: 600px; margin: 0 auto; }
+        header { text-align: center; margin-bottom: 24px; }
+        h1 { font-size: 1.8rem; margin-bottom: 4px; color: #fff; }
+        p.subtitle { color: var(--text-muted); font-size: 0.9rem; }
+        .card { background-color: var(--card-bg); border-radius: 12px; padding: 16px; margin-bottom: 16px; border: 1px solid var(--border); }
+        .progress-container { width: 100%; background-color: var(--border); border-radius: 8px; height: 12px; overflow: hidden; margin-top: 8px; }
+        .progress-bar { height: 100%; background-color: var(--success); width: 0%; transition: width 0.3s ease; }
+        .grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-top: 12px; }
+        .day-btn { background-color: var(--border); border: none; border-radius: 8px; padding: 12px 0; color: var(--text-color); font-weight: bold; font-size: 0.9rem; cursor: pointer; transition: all 0.2s; }
+        .day-btn.completed { background-color: var(--success); color: #fff; }
+        .day-btn.active { border: 2px solid var(--accent); }
+        .task-item { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); }
+        .task-item:last-child { border-bottom: none; }
+        .task-label { display: flex; align-items: center; gap: 10px; font-size: 0.95rem; cursor: pointer; }
+        .task-label input { width: 18px; height: 18px; accent-color: var(--accent); cursor: pointer; }
+        .btn-danger { background: none; border: none; color: var(--danger); cursor: pointer; font-size: 0.85rem; }
+        .add-task-box { display: flex; gap: 8px; margin-top: 12px; }
+        .add-task-box input { flex: 1; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background-color: var(--bg-color); color: var(--text-color); font-size: 0.9rem; }
+        .btn-primary { background-color: var(--accent); color: white; border: none; border-radius: 8px; padding: 10px 16px; font-weight: bold; cursor: pointer; }
+        .btn-primary:hover { background-color: var(--accent-hover); }
+        .meal-box { margin-top: 16px; padding-top: 16px; border-top: 1px dashed var(--border); }
+        .meal-list { margin-top: 10px; font-size: 0.85rem; }
+        .meal-item { background: var(--bg-color); padding: 8px; border-radius: 6px; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; }
+        .meal-input-group { margin-top: 10px; display: flex; flex-direction: column; gap: 8px; }
+        .meal-input-group input[type="text"] { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background-color: var(--bg-color); color: var(--text-color); font-size: 0.9rem; }
+        .calories-summary { background: var(--bg-color); padding: 12px; border-radius: 8px; margin-top: 12px; font-size: 0.9rem; border: 1px solid var(--border); }
+        .cal-row { display: flex; justify-content: space-between; margin-bottom: 6px; }
+        .cal-row input { width: 100px; padding: 4px 8px; background: var(--card-bg); border: 1px solid var(--border); color: #fff; border-radius: 4px; text-align: right; }
+        .deficit-row { display: flex; justify-content: space-between; font-weight: bold; margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border); }
+        .actions-footer { display: flex; justify-content: space-between; margin-top: 20px; font-size: 0.85rem; }
+        .actions-footer button { background: none; border: none; color: var(--text-muted); text-decoration: underline; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Cave Mode</h1>
+        <p class="subtitle">Controle de 90 Dias</p>
+    </header>
+
+    <div class="card">
+        <h3>Progresso Geral</h3>
+        <div style="display: flex; justify-content: space-between; margin-top: 8px; font-size: 0.85rem; color: var(--text-muted);">
+            <span id="progress-text">0 de 90 dias concluídos</span>
+            <span id="progress-percent">0%</span>
+        </div>
+        <div class="progress-container">
+            <div class="progress-bar" id="progress-bar"></div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3>Calendário (Dias 1 a 90)</h3>
+        <div class="grid" id="days-grid"></div>
+    </div>
+
+    <div class="card">
+        <h3 id="current-day-title">Dia 1 - Tarefas</h3>
+        <div id="tasks-list" style="margin-top: 10px;"></div>
+        
+        <div class="add-task-box">
+            <input type="text" id="new-task-input" placeholder="Nova tarefa (ex: Meditar 10 min)">
+            <button class="btn-primary" onclick="addTask()">Adicionar</button>
+        </div>
+
+        <!-- Seção de Dieta, Calorias e Garmin -->
+        <div class="meal-box">
+            <h4>Controle Energético & Dieta</h4>
+            
+            <div class="meal-input-group">
+                <input type="text" id="meal-notes-input" placeholder="Ex: 150g arroz, 120g frango (opcional)">
+                <input type="file" id="meal-photo-input" accept="image/*" capture="environment" style="display: none;" onchange="handleMealPhoto(event)">
+                <button class="btn-primary" style="width: 100%; background-color: #10b981;" onclick="document.getElementById('meal-photo-input').click()">📷 Enviar Foto do Prato + Pesos</button>
+            </div>
+            <div id="meal-loading" style="text-align: center; color: var(--text-muted); font-size: 0.85rem; margin-top: 8px; display: none;">Analisando prato com IA...</div>
+            
+            <div class="meal-list" id="meal-list"></div>
+
+            <div class="calories-summary">
+                <div class="cal-row">
+                    <span>Total Consumido:</span>
+                    <span id="total-consumed">0 kcal</span>
+                </div>
+                <div class="cal-row" style="align-items: center;">
+                    <span>Gasto Garmin:</span>
+                    <input type="number" id="garmin-input" placeholder="Ex: 2800" oninput="updateGarminCalories(this.value)">
+                </div>
+                <div class="deficit-row">
+                    <span>Déficit / Saldo:</span>
+                    <span id="total-deficit" style="color: var(--success);">0 kcal</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="actions-footer">
+        <button onclick="exportData()">Exportar Backup</button>
+        <button onclick="resetData()" style="color: var(--danger);">Reiniciar Tudo</button>
+    </div>
+
+<script>
+    const GEMINI_API_KEY = "SUA_CHAVE_DE_API_AQUI"; // Insira sua chave da API do Gemini se for usar IA para fotos
+
+    const TOTAL_DAYS = 90;
+    const DEFAULT_TASKS = [
+        "Leitura (mín. 10 pág.)",
+        "Atividade física / Treino",
+        "TRT/TPC / Suplementação",
+        "Mudança Mental: Músicas / Podcasts / Vídeos",
+        "Dieta: Quebrando a compulsão alimentar"
+    ];
+
+    let state = JSON.parse(localStorage.getItem('cave_mode_state')) || {
+        currentDay: 1,
+        days: {}
+    };
+
+    function initDays() {
+        for (let i = 1; i <= TOTAL_DAYS; i++) {
+            if (!state.days[i]) {
+                state.days[i] = {
+                    completed: false,
+                    tasks: DEFAULT_TASKS.map(t => ({ text: t, done: false })),
+                    meals: [],
+                    garminCalories: 0
+                };
+            }
+        }
+    }
+
+    function saveState() {
+        localStorage.setItem('cave_mode_state', JSON.stringify(state));
+        render();
+    }
+
+    function selectDay(day) {
+        state.currentDay = day;
+        saveState();
+    }
+
+    function toggleTask(index) {
+        const dayData = state.days[state.currentDay];
+        dayData.tasks[index].done = !dayData.tasks[index].done;
+        dayData.completed = dayData.tasks.length > 0 && dayData.tasks.every(t => t.done);
+        saveState();
+    }
+
+    function addTask() {
+        const input = document.getElementById('new-task-input');
+        const text = input.value.trim();
+        if(!text) return;
+
+        state.days[state.currentDay].tasks.push({ text: text, done: false });
+        input.value = '';
+        saveState();
+    }
+
+    function removeTask(index) {
+        state.days[state.currentDay].tasks.splice(index, 1);
+        const dayData = state.days[state.currentDay];
+        dayData.completed = dayData.tasks.length > 0 && dayData.tasks.every(t => t.done);
+        saveState();
+    }
+
+    function updateGarminCalories(val) {
+        state.days[state.currentDay].garminCalories = Number(val) || 0;
+        saveState(false);
+    }
+
+    async function handleMealPhoto(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        if (GEMINI_API_KEY === "SUA_CHAVE_DE_API_AQUI") {
+            alert("Por favor, configure sua chave de API do Gemini no código para usar a análise de fotos.");
+            return;
+        }
+
+        const notesInput = document.getElementById('meal-notes-input');
+        const userNotes = notesInput.value.trim();
+
+        const loading = document.getElementById('meal-loading');
+        loading.style.display = 'block';
+
+        try {
+            const base64Image = await fileToBase64(file);
+            const base64Data = base64Image.split(',')[1];
+
+            let promptText = "Analise esta foto de comida e retorne estritamente um objeto JSON com duas chaves: 'description' (uma breve descrição dos alimentos em português) e 'calories' (número inteiro estimado de calorias totais do prato). Exemplo: {\"description\": \"Arroz, feijão e frango grelhado\", \"calories\": 520}";
+            if (userNotes) {
+                promptText += ` Leve em consideração estes pesos/informações fornecidos pelo usuário sobre os alimentos: "${userNotes}".`;
+            }
+
+            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    contents: [{
+                        parts: [
+                            { text: promptText },
+                            { inline_data: { mime_type: file.type, data: base64Data } }
+                        ]
+                    }]
+                })
+            });
+
+            const data = await response.json();
+            const textResponse = data.candidates[0].content.parts[0].text;
+            const cleanJson = textResponse.replace(/```json/g, '').replace(/```/g, '').trim();
+            const mealInfo = JSON.parse(cleanJson);
+
+            state.days[state.currentDay].meals.push({
+                description: userNotes ? `${mealInfo.description} (${userNotes})` : mealInfo.description,
+                calories: Number(mealInfo.calories)
+            });
+
+            notesInput.value = ''; // Limpa o campo de notas
+            saveState();
+        } catch (error) {
+            console.error(error);
+            alert("Erro ao analisar a foto. Verifique sua chave de API ou tente novamente.");
+        } finally {
+            loading.style.display = 'none';
+            event.target.value = '';
+        }
+    }
+
+    function fileToBase64(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = error => reject(error);
+        });
+    }
+
+    function removeMeal(index) {
+        state.days[state.currentDay].meals.splice(index, 1);
+        saveState();
+    }
+
+    function render(updateInput = true) {
+        const grid = document.getElementById('days-grid');
+        grid.innerHTML = '';
+        let completedCount = 0;
+
+        for (let i = 1; i <= TOTAL_DAYS; i++) {
+            const btn = document.createElement('button');
+            btn.className = 'day-btn';
+            if (state.days[i].completed) {
+                btn.classList.add('completed');
+                completedCount++;
+            }
+            if (i === state.currentDay) {
+                btn.classList.add('active');
+            }
+            btn.innerText = i;
+            btn.onclick = () => selectDay(i);
+            grid.appendChild(btn);
+        }
+
+        const percent = Math.round((completedCount / TOTAL_DAYS) * 100);
+        document.getElementById('progress-text').innerText = `${completedCount} de ${TOTAL_DAYS} dias concluídos`;
+        document.getElementById('progress-percent').innerText = `${percent}%`;
+        document.getElementById('progress-bar').style.width = `${percent}%`;
+
+        document.getElementById('current-day-title').innerText = `Dia ${state.currentDay} - Tarefas`;
+        
+        // Render Tarefas
+        const tasksList = document.getElementById('tasks-list');
+        tasksList.innerHTML = '';
+        const currentTasks = state.days[state.currentDay].tasks;
+        
+        currentTasks.forEach((task, index) => {
+            const div = document.createElement('div');
+            div.className = 'task-item';
+            div.innerHTML = `
+                <label class="task-label">
+                    <input type="checkbox" ${task.done ? 'checked' : ''} onchange="toggleTask(${index})">
+                    <span style="${task.done ? 'text-decoration: line-through; color: var(--text-muted);' : ''}">${task.text}</span>
+                </label>
+                <button class="btn-danger" onclick="removeTask(${index})">Excluir</button>
+            `;
+            tasksList.appendChild(div);
+        });
+
+        // Render Refeições
+        const mealList = document.getElementById('meal-list');
+        mealList.innerHTML = '';
+        const currentMeals = state.days[state.currentDay].meals || [];
+        let totalConsumed = 0;
+
+        currentMeals.forEach((meal, index) => {
+            totalConsumed += meal.calories;
+            const div = document.createElement('div');
+            div.className = 'meal-item';
+            div.innerHTML = `
+                <span>🍽️ ${meal.description} (<b>${meal.calories} kcal</b>)</span>
+                <button class="btn-danger" onclick="removeMeal(${index})">Remover</button>
+            `;
+            mealList.appendChild(div);
+        });
+
+        document.getElementById('total-consumed').innerText = `${totalConsumed} kcal`;
+
+        // Garmin e Déficit
+        const garminVal = state.days[state.currentDay].garminCalories || 0;
+        if (updateInput) {
+            document.getElementById('garmin-input').value = garminVal > 0 ? garminVal : '';
+        }
+
+        const deficit = garminVal - totalConsumed;
+        const deficitEl = document.getElementById('total-deficit');
+        deficitEl.innerText = `${deficit > 0 ? '+' : ''}${deficit} kcal`;
+        deficitEl.style.color = deficit >= 0 ? 'var(--success)' : 'var(--danger)';
+    }
+
+    function exportData() {
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state));
+        const downloadAnchor = document.createElement('a');
+        downloadAnchor.setAttribute("href", dataStr);
+        downloadAnchor.setAttribute("download", "cave_mode_backup.json");
+        document.body.appendChild(downloadAnchor);
+        downloadAnchor.click();
+        downloadAnchor.remove();
+    }
+
+    function resetData() {
+        if(confirm("Tem certeza que deseja apagar todo o progresso?")) {
+            localStorage.removeItem('cave_mode_state');
+            location.reload();
+        }
+    }
+
+    initDays();
+    render();
+</script>
+
+</body>
+</html>
