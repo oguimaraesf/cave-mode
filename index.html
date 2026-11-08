@@ -185,4 +185,179 @@ function setD(n, d) { state.days[n] = d; save(); }
 // Cálculo do dia atual baseado na data de início
 const inicioData = new Date(state.startDate + 'T00:00:00');
 const hojeData = new Date(); hojeData.setHours(0,0,0,0);
-let diaHoje = Math.min(TOTAL,
+let diaHoje = Math.min(TOTAL, Math.max(1, Math.floor((hojeData - inicioData)/864e5) + 1));
+let diaSelecionado = diaHoje;
+
+// ================= GRÁFICOS (CHART.JS) =================
+Chart.defaults.color = '#8b8b95';
+Chart.defaults.font.family = '-apple-system, BlinkMacSystemFont, sans-serif';
+
+let chartCal, chartMac;
+
+function initCharts() {
+  const ctxCal = document.getElementById('chartCalories').getContext('2d');
+  chartCal = new Chart(ctxCal, {
+    type: 'bar',
+    data: { labels: Array.from({length: TOTAL}, (_, i) => i+1), datasets: [] },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: { legend: { position: 'top', labels: { boxWidth: 10, font: {size: 10} } } },
+      scales: {
+        y: { type: 'linear', display: true, position: 'left', title: {display: true, text: 'Kcal', font:{size:9}} },
+        y1: { type: 'linear', display: true, position: 'right', grid: {drawOnChartArea: false}, min: 0, max: 100, title: {display: true, text: 'Sleep', font:{size:9}} },
+        x: { ticks: { maxTicksLimit: 20 } }
+      }
+    }
+  });
+
+  const ctxMac = document.getElementById('chartMacros').getContext('2d');
+  chartMac = new Chart(ctxMac, {
+    type: 'bar',
+    data: { labels: Array.from({length: TOTAL}, (_, i) => i+1), datasets: [] },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { position: 'top', labels: { boxWidth: 10, font: {size: 10} } } },
+      scales: {
+        x: { stacked: true, ticks: { maxTicksLimit: 20 } },
+        y: { stacked: true, title: {display: true, text: 'Gramas (g)', font:{size:9}} }
+      }
+    }
+  });
+}
+
+function updateCharts() {
+  const data = Array.from({length: TOTAL}, (_, i) => getD(i + 1));
+  
+  // Update Calories & Sleep Chart
+  chartCal.data.datasets = [
+    { label: 'Gasto (kcal)', type: 'line', data: data.map(d => d.gasto || null), borderColor: '#ef4444', backgroundColor: '#ef4444', borderWidth: 2, tension: 0.3, yAxisID: 'y' },
+    { label: 'Consumo (kcal)', type: 'line', data: data.map(d => d.consumo || null), borderColor: '#22c55e', backgroundColor: '#22c55e', borderWidth: 2, tension: 0.3, yAxisID: 'y' },
+    { label: 'Sleep Score', type: 'bar', data: data.map(d => d.sleep || null), backgroundColor: 'rgba(168, 85, 247, 0.5)', yAxisID: 'y1', borderRadius: 4 }
+  ];
+  chartCal.update();
+
+  // Update Macros Chart
+  chartMac.data.datasets = [
+    { label: 'Carboidratos', data: data.map(d => d.carbs || null), backgroundColor: '#3b82f6', borderRadius: 2 },
+    { label: 'Proteínas', data: data.map(d => d.prot || null), backgroundColor: '#ef4444', borderRadius: 2 },
+    { label: 'Gorduras', data: data.map(d => d.fat || null), backgroundColor: '#f59e0b', borderRadius: 2 }
+  ];
+  chartMac.update();
+}
+
+// ================= UI & LÓGICA =================
+const $ = id => document.getElementById(id);
+
+function renderGrid() {
+  let html = '';
+  for(let n = 1; n <= TOTAL; n++) {
+    const d = getD(n);
+    const classes = ['chip'];
+    // Considera "concluído" (verde) se fez o básico: Treino, Sem Doce, Sem Compulsão
+    if(d.treino && d.doce && d.comp) classes.push('c');
+    if(n === diaHoje) classes.push('hoje');
+    if(n === diaSelecionado) classes.push('sel');
+    html += `<button class="${classes.join(' ')}" data-n="${n}">${n}</button>`;
+  }
+  $('grid').innerHTML = html;
+}
+
+function renderStats() {
+  let doces = 0, comp = 0, deficitAcumulado = 0;
+  for(let n = 1; n <= TOTAL; n++) {
+    const d = getD(n);
+    if(d.doce) doces++;
+    if(d.comp) comp++;
+    if(d.gasto && d.consumo) {
+      deficitAcumulado += (parseFloat(d.gasto) - parseFloat(d.consumo));
+    }
+  }
+  $('stDoce').textContent = `${doces}/${TOTAL}`;
+  $('stComp').textContent = `${comp}/${TOTAL}`;
+  
+  const defEl = $('stDeficit');
+  defEl.textContent = `${deficitAcumulado > 0 ? '+' : ''}${deficitAcumulado.toLocaleString('pt-BR')} kcal`;
+  defEl.style.color = deficitAcumulado >= 0 ? 'var(--grn)' : 'var(--red)';
+}
+
+function syncCheck(id, lblId, val) {
+  const el = $(id), lbl = $(lblId);
+  el.checked = val;
+  val ? lbl.classList.add('on') : lbl.classList.remove('on');
+}
+
+function renderForm() {
+  $('diaLabel').textContent = `DIA ${diaSelecionado}`;
+  $('prev').disabled = diaSelecionado <= 1;
+  $('next').disabled = diaSelecionado >= TOTAL;
+
+  const d = getD(diaSelecionado);
+  syncCheck('treino', 'lblTreino', d.treino);
+  syncCheck('doce', 'lblDoce', d.doce);
+  syncCheck('comp', 'lblComp', d.comp);
+  
+  $('gasto').value = d.gasto; $('consumo').value = d.consumo; $('sleep').value = d.sleep;
+  $('carbs').value = d.carbs; $('prot').value = d.prot; $('fat').value = d.fat;
+}
+
+function updateApp() { renderGrid(); renderStats(); renderForm(); updateCharts(); }
+
+// ================= EVENTOS =================
+$('grid').addEventListener('click', e => {
+  const b = e.target.closest('.chip'); 
+  if(!b) return;
+  diaSelecionado = +b.dataset.n; 
+  updateApp();
+});
+
+$('prev').onclick = () => { if(diaSelecionado > 1) { diaSelecionado--; updateApp(); } };
+$('next').onclick = () => { if(diaSelecionado < TOTAL) { diaSelecionado++; updateApp(); } };
+
+// Atualiza dados no formulário
+function onFieldChange() {
+  const d = getD(diaSelecionado);
+  d.treino = $('treino').checked; syncCheck('treino', 'lblTreino', d.treino);
+  d.doce = $('doce').checked; syncCheck('doce', 'lblDoce', d.doce);
+  d.comp = $('comp').checked; syncCheck('comp', 'lblComp', d.comp);
+  
+  d.gasto = $('gasto').value; d.consumo = $('consumo').value; d.sleep = $('sleep').value;
+  d.carbs = $('carbs').value; d.prot = $('prot').value; d.fat = $('fat').value;
+  
+  setD(diaSelecionado, d);
+  updateApp();
+}
+
+['treino', 'doce', 'comp'].forEach(id => $(id).addEventListener('change', onFieldChange));
+['gasto', 'consumo', 'sleep', 'carbs', 'prot', 'fat'].forEach(id => $(id).addEventListener('input', onFieldChange));
+
+// Ferramentas (Backup / Limpeza)
+$('exp').onclick = () => {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([JSON.stringify(state, null, 2)], {type: 'application/json'}));
+  a.download = 'projeto100-v2-backup.json'; a.click();
+};
+$('imp').onclick = () => $('file').click();
+$('file').addEventListener('change', e => {
+  const f = e.target.files[0]; if(!f) return;
+  const r = new FileReader();
+  r.onload = () => {
+    try {
+      const p = JSON.parse(r.result); if(!p || !p.days) throw 0;
+      state = p; save(); diaSelecionado = 1; updateApp(); alert('Backup importado!');
+    } catch(_) { alert('Arquivo inválido.'); }
+  };
+  r.readAsText(f);
+});
+$('zap').onclick = () => {
+  if(confirm('Tem certeza que deseja apagar TUDO?')) {
+    state.days = {}; save(); updateApp();
+  }
+};
+
+// Inicialização
+initCharts();
+updateApp();
+</script>
+</body>
+</html>
