@@ -4,282 +4,185 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <meta name="theme-color" content="#050505" />
-<meta name="apple-mobile-web-app-capable" content="yes" />
-<title>PROJETO 100 — Foco & Resiliência</title>
+<title>PROJETO 100 — Dashboard</title>
+<!-- Importando Chart.js para os gráficos -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <style>
-  :root{
-    --bg:#050505; --card:#0e0e11; --card2:#141419; --line:#232329;
-    --txt:#f2f2f2; --mut:#8b8b95; --grn:#22c55e; --grn2:#16a34a;
-    --red:#ef4444; --amb:#f59e0b;
+  :root {
+    --bg: #050505; --card: #0e0e11; --card2: #141419; --line: #232329;
+    --txt: #f2f2f2; --mut: #8b8b95; 
+    --grn: #22c55e; --grn2: #16a34a; --red: #ef4444; --amb: #f59e0b;
+    --blue: #3b82f6; --purple: #a855f7;
   }
-  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
-  html,body{margin:0;padding:0}
-  body{
-    background:var(--bg); color:var(--txt);
-    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-    min-height:100vh; padding-bottom:48px;
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--bg); color: var(--txt);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    min-height: 100vh; padding-bottom: 48px;
   }
-  .wrap{max-width:760px;margin:0 auto;padding:14px}
+  .wrap { max-width: 800px; margin: 0 auto; padding: 14px; display: flex; flex-direction: column; gap: 16px; }
 
-  /* ===== CABEÇALHO ===== */
-  .top{text-align:center;padding:26px 0 6px}
-  h1{font-size:clamp(30px,7vw,42px);letter-spacing:8px;margin:0;font-weight:900}
-  h1 .n{color:var(--grn)}
-  .sub{color:var(--mut);letter-spacing:4px;font-size:11px;text-transform:uppercase;margin-top:8px}
-
-  .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:20px 0 12px}
-  .stat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 6px;text-align:center}
-  .stat b{display:block;font-size:24px;font-weight:900}
-  .stat span{font-size:9px;color:var(--mut);letter-spacing:2px;text-transform:uppercase}
-  .stat.hi b{color:var(--grn)}
-  .bar{height:6px;background:var(--card2);border-radius:99px;overflow:hidden;margin-bottom:18px;border:1px solid var(--line)}
-  .bar i{display:block;height:100%;background:linear-gradient(90deg,var(--grn2),var(--grn));width:0%;transition:width .4s}
+  /* ===== TIPOGRAFIA E CABEÇALHO ===== */
+  .top { text-align: center; padding: 10px 0 0; }
+  h1 { font-size: clamp(24px, 5vw, 32px); letter-spacing: 4px; margin: 0; font-weight: 900; text-transform: uppercase; }
+  h2.section-title { font-size: 11px; letter-spacing: 2px; color: var(--mut); text-transform: uppercase; margin: 0 0 10px 0; }
 
   /* ===== CARTÕES ===== */
-  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:14px}
-  .bloco h2{display:flex;align-items:center;gap:10px;font-size:14px;letter-spacing:4px;margin:0 0 14px;font-weight:900}
-  .tag{font-size:8px;padding:4px 9px;border-radius:99px;letter-spacing:2px;font-weight:700}
-  .tag.corpo{background:rgba(59,130,246,.12);color:#60a5fa;border:1px solid rgba(59,130,246,.35)}
-  .tag.mente{background:rgba(168,85,247,.12);color:#c084fc;border:1px solid rgba(168,85,247,.35)}
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 16px; }
+  
+  /* ===== GRÁFICOS ===== */
+  .chart-container { position: relative; height: 220px; width: 100%; margin-bottom: 10px; }
+  .chart-container:last-child { margin-bottom: 0; }
 
-  /* ===== NAVEGAÇÃO DE DIAS ===== */
-  .navrow{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
-  .dia-atual{font-weight:900;font-size:18px;letter-spacing:2px}
-  .btn{background:var(--card2);border:1px solid var(--line);color:var(--txt);border-radius:10px;padding:8px 16px;font-size:14px;cursor:pointer;font-weight:700}
-  .btn:active{transform:scale(.95)}
-  .btn:disabled{opacity:.3;cursor:default}
-  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(38px,1fr));gap:6px}
-  .chip{aspect-ratio:1;border-radius:9px;border:1px solid var(--line);background:var(--card2);color:var(--mut);font-size:10px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0}
-  .chip.hoje{border-color:var(--amb)}
-  .chip.sel{outline:2px solid #fff;outline-offset:2px}
-  .chip.c{background:var(--grn2);border-color:var(--grn);color:#03130a}
-  .banner{display:none;margin-top:14px;padding:12px;border-radius:12px;background:rgba(34,197,94,.12);border:1px solid var(--grn);color:var(--grn);font-weight:900;letter-spacing:1px;text-align:center;font-size:13px}
-  .banner.on{display:block;animation:pop .3s}
-  @keyframes pop{from{transform:scale(.94);opacity:0}}
+  /* ===== ESTATÍSTICAS ===== */
+  .stats-row { display: flex; gap: 10px; }
+  .stat-box { 
+    flex: 1; background: var(--card2); border: 1px solid var(--line); 
+    border-radius: 12px; padding: 16px 10px; text-align: center; 
+  }
+  .stat-box h4 { margin: 0 0 8px; font-size: 9px; color: var(--mut); letter-spacing: 1px; text-transform: uppercase; }
+  .stat-box span { display: block; font-size: 20px; font-weight: 900; }
+  .stat-box span.highlight { color: var(--grn); }
 
-  /* ===== CORPO ===== */
-  .kcal{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
-  .field{background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
-  .field label{display:block;font-size:9px;color:var(--mut);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px;font-weight:700}
-  .field input{width:100%;background:transparent;border:none;outline:none;color:var(--txt);font-size:22px;font-weight:900;padding:0}
-  .field input::placeholder{color:#3a3a42}
-  .saldo{font-size:12px;color:var(--mut);min-height:18px;margin-bottom:12px}
-  .saldo b.pos{color:var(--grn)} .saldo b.neg{color:var(--red)}
+  /* ===== GRID 100 DIAS ===== */
+  .grid-wrap { position: relative; padding: 20px; border-radius: 16px; border: 2px solid var(--line); background: var(--card); }
+  .grid-wrap::before { content: '1'; position: absolute; top: 6px; left: 10px; font-size: 10px; font-weight: 900; color: var(--mut); }
+  .grid-wrap::after { content: '100'; position: absolute; bottom: 6px; right: 10px; font-size: 10px; font-weight: 900; color: var(--mut); }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(32px, 1fr)); gap: 6px; }
+  .chip { 
+    aspect-ratio: 1; border-radius: 8px; border: 1px solid var(--line); 
+    background: var(--card2); color: var(--mut); font-size: 10px; font-weight: 800; 
+    cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0;
+  }
+  .chip.hoje { border-color: var(--amb); }
+  .chip.sel { outline: 2px solid #fff; outline-offset: 2px; }
+  .chip.c { background: var(--grn2); border-color: var(--grn); color: #03130a; }
 
-  /* ===== CHECKBOXES ===== */
-  .checks{display:flex;flex-direction:column;gap:8px}
-  .chk{display:flex;align-items:center;gap:12px;background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:13px 14px;cursor:pointer;user-select:none;transition:border-color .15s,background .15s}
-  .chk input{display:none}
-  .box{width:22px;height:22px;border-radius:7px;border:2px solid #3a3a42;flex:none;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;color:transparent;transition:all .15s}
-  .chk.on{border-color:var(--grn);background:rgba(34,197,94,.08)}
-  .chk.on .box{background:var(--grn);border-color:var(--grn);color:#03130a}
-  .chk .t{flex:1;font-size:14px;font-weight:600}
-  .chk .ic{font-size:18px}
-  .zerar{text-align:right;margin-top:10px}
-  .zerar button{background:none;border:none;color:var(--mut);font-size:11px;cursor:pointer;text-decoration:underline}
+  /* ===== FORMULÁRIO DO DIA ===== */
+  .navrow { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; background: var(--card2); padding: 8px; border-radius: 12px; border: 1px solid var(--line);}
+  .dia-atual { font-weight: 900; font-size: 16px; letter-spacing: 2px; }
+  .btn { background: var(--card); border: 1px solid var(--line); color: var(--txt); border-radius: 8px; padding: 6px 16px; font-size: 14px; cursor: pointer; font-weight: 700; }
+  .btn:active { transform: scale(0.95); }
+  
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+  .field { background: var(--card2); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; }
+  .field label { display: block; font-size: 9px; color: var(--mut); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px; font-weight: 700; }
+  .field input { width: 100%; background: transparent; border: none; outline: none; color: var(--txt); font-size: 18px; font-weight: 900; padding: 0; }
+  .field input::placeholder { color: #3a3a42; }
+
+  .checks-row { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+  .chk { display: flex; align-items: center; gap: 12px; background: var(--card2); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; cursor: pointer; user-select: none; transition: 0.2s; }
+  .chk input { display: none; }
+  .box { width: 20px; height: 20px; border-radius: 6px; border: 2px solid #3a3a42; flex: none; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 900; color: transparent; }
+  .chk.on { border-color: var(--grn); background: rgba(34,197,94,0.08); }
+  .chk.on .box { background: var(--grn); border-color: var(--grn); color: #03130a; }
+  .chk .t { flex: 1; font-size: 13px; font-weight: 600; }
 
   /* ===== AJUSTES ===== */
-  .setrow{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
-  .setrow label{font-size:12px;color:var(--mut);display:flex;align-items:center;gap:6px}
-  .setrow input[type=date]{background:var(--card2);border:1px solid var(--line);color:var(--txt);border-radius:10px;padding:8px 10px;font-size:13px}
-  .btn.danger{color:var(--red);border-color:rgba(239,68,68,.4)}
-  .note{color:var(--mut);font-size:11px;line-height:1.7;margin:12px 0 0}
+  .tools { display: flex; gap: 8px; justify-content: center; margin-top: 20px; flex-wrap: wrap; }
+  .tools .btn { font-size: 11px; padding: 6px 12px; }
+  .danger { color: var(--red); border-color: rgba(239,68,68,0.4); }
 </style>
 </head>
 <body>
-<div class="wrap">
 
+<div class="wrap">
   <header class="top">
-    <h1>PROJETO <span class="n">100</span></h1>
-    <div class="sub">Foco • Disciplina • Resiliência</div>
+    <h1>PROJETO 100</h1>
   </header>
 
-  <div class="stats">
-    <div class="stat"><b id="stDia">–</b><span>Dia atual</span></div>
-    <div class="stat hi"><b id="stVerdes">0</b><span>Dias verdes</span></div>
-    <div class="stat"><b id="stSeq">0</b><span>Sequência</span></div>
-  </div>
-  <div class="bar"><i id="barFill"></i></div>
-
-  <!-- DIAS 1–100 -->
+  <!-- DASHBOARDS -->
   <section class="card">
+    <h2 class="section-title">Dashboard - Déficit Calórico & Sono</h2>
+    <div class="chart-container">
+      <canvas id="chartCalories"></canvas>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2 class="section-title">Distribuição de Macros</h2>
+    <div class="chart-container">
+      <canvas id="chartMacros"></canvas>
+    </div>
+  </section>
+
+  <!-- ESTATÍSTICAS -->
+  <div class="stats-row">
+    <div class="stat-box">
+      <h4>Dias Sem Doce</h4>
+      <span id="stDoce">0/100</span>
+    </div>
+    <div class="stat-box">
+      <h4>Dias Sem Compulsão</h4>
+      <span id="stComp">0/100</span>
+    </div>
+    <div class="stat-box">
+      <h4>Déficit Acumulado</h4>
+      <span id="stDeficit" class="highlight">0 kcal</span>
+    </div>
+  </div>
+
+  <!-- GRID DE 100 DIAS -->
+  <div class="grid-wrap">
+    <div class="grid" id="grid"></div>
+  </div>
+
+  <!-- FORMULÁRIO DO DIA -->
+  <section class="card">
+    <h2 class="section-title">Formulário do Dia</h2>
     <div class="navrow">
       <button class="btn" id="prev">←</button>
       <div class="dia-atual" id="diaLabel">DIA 1</div>
       <button class="btn" id="next">→</button>
     </div>
-    <div class="grid" id="grid"></div>
-    <div class="banner" id="banner"></div>
-  </section>
 
-  <!-- BLOCO 1: CORPO -->
-  <section class="card bloco" id="editor">
-    <h2>CORPO <span class="tag corpo">TREINO + ENERGIA</span></h2>
-    <div class="kcal">
-      <div class="field"><label>🔥 Gasto calórico (kcal)</label><input type="number" id="gasto" inputmode="decimal" step="any" min="0" placeholder="0"></div>
-      <div class="field"><label>🍽️ Consumo calórico (kcal)</label><input type="number" id="consumo" inputmode="decimal" step="any" min="0" placeholder="0"></div>
+    <div class="checks-row">
+      <label class="chk" id="lblTreino">
+        <input type="checkbox" id="treino"><span class="box">✓</span><span class="t">Treino realizado</span>
+      </label>
+      <label class="chk" id="lblDoce">
+        <input type="checkbox" id="doce"><span class="box">✓</span><span class="t">Dia sem doce</span>
+      </label>
+      <label class="chk" id="lblComp">
+        <input type="checkbox" id="comp"><span class="box">✓</span><span class="t">Dia sem compulsão</span>
+      </label>
     </div>
-    <div class="saldo" id="saldo"></div>
-    <div class="checks" id="chkTreino"></div>
-    <div class="zerar"><button id="zerar">zerar este dia</button></div>
-  </section>
 
-  <!-- BLOCO 2: MENTE -->
-  <section class="card bloco">
-    <h2>MENTE <span class="tag mente">DISCIPLINA DIÁRIA</span></h2>
-    <div class="checks" id="chkMente"></div>
-  </section>
-
-  <!-- AJUSTES -->
-  <section class="card">
-    <h2 class="bloco" style="font-size:12px;letter-spacing:4px;margin:0 0 12px;font-weight:900">AJUSTES</h2>
-    <div class="setrow">
-      <label>Início do projeto: <input type="date" id="inicio"></label>
-      <button class="btn" id="exp">⬇ Exportar</button>
-      <button class="btn" id="imp">⬆ Importar</button>
-      <button class="btn danger" id="zap">Apagar tudo</button>
-      <input type="file" id="file" accept=".json,application/json" hidden>
+    <div class="form-grid">
+      <div class="field"><label>🔥 Gasto calórico (kcal)</label><input type="number" id="gasto" placeholder="0"></div>
+      <div class="field"><label>🍽️ Consumo calórico (kcal)</label><input type="number" id="consumo" placeholder="0"></div>
+      <div class="field"><label>💤 Sleep Score (0-100)</label><input type="number" id="sleep" placeholder="0" max="100"></div>
+      <div class="field"><label>🍞 Carboidratos (g)</label><input type="number" id="carbs" placeholder="0"></div>
+      <div class="field"><label>🥩 Proteínas (g)</label><input type="number" id="prot" placeholder="0"></div>
+      <div class="field"><label>🥑 Gorduras (g)</label><input type="number" id="fat" placeholder="0"></div>
     </div>
-    <p class="note">Os dados ficam salvos no próprio aparelho (localStorage). Para levar o progresso do celular para o computador (ou vice-versa), use <b>Exportar</b> no um aparelho e <b>Importar</b> no outro.</p>
   </section>
 
+  <!-- CONTROLES -->
+  <div class="tools">
+    <button class="btn" id="exp">Exportar Backup</button>
+    <button class="btn" id="imp">Importar Backup</button>
+    <button class="btn danger" id="zap">Apagar Tudo</button>
+    <input type="file" id="file" accept=".json,application/json" hidden>
+  </div>
 </div>
 
 <script>
-const KEY='projeto100_v1', TOTAL=100;
-const MENTE=[
-  {id:'leitura',  ic:'📖', t:'Leitura'},
-  {id:'conteudo', ic:'🧠', t:'Conteúdo de qualidade'},
-  {id:'musica',   ic:'🎵', t:'Sem funks / músicas ruins'},
-  {id:'tpc',      ic:'📝', t:'TPC'},
-  {id:'redes',    ic:'📵', t:'Sem uso de redes sociais'},
-  {id:'cartao',   ic:'💳', t:'Sem gastos no cartão de crédito'},
-  {id:'delivery', ic:'🛵', t:'Sem delivery'}
-];
-const ALL=['treino'].concat(MENTE.map(m=>m.id));
+// ================= ESTADO & ARMAZENAMENTO =================
+const KEY = 'projeto100_v2', TOTAL = 100;
+function emptyDay() { return { treino: false, doce: false, comp: false, gasto: '', consumo: '', sleep: '', carbs: '', prot: '', fat: '' }; }
+function load() { 
+  try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.days) return s; } catch(e){} 
+  return { startDate: new Date().toISOString().split('T')[0], days: {} }; 
+}
+let state = load();
+function save() { localStorage.setItem(KEY, JSON.stringify(state)); }
+function getD(n) { return Object.assign(emptyDay(), state.days[n] || {}); }
+function setD(n, d) { state.days[n] = d; save(); }
 
-const $=id=>document.getElementById(id);
-const grid=$('grid'), banner=$('banner'), diaLabel=$('diaLabel');
-
-function emptyDay(){return{gasto:'',consumo:'',treino:false,leitura:false,conteudo:false,musica:false,tpc:false,redes:false,cartao:false,delivery:false};}
-function todayStr(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
-function load(){try{const s=JSON.parse(localStorage.getItem(KEY));if(s&&s.days)return{startDate:s.startDate||null,days:s.days};}catch(e){}return{startDate:null,days:{}};}
-function save(){localStorage.setItem(KEY,JSON.stringify(state));}
-function getD(n){return Object.assign(emptyDay(),state.days[n]||{});}
-function setD(n,d){state.days[n]=d;save();}
-function isCompleto(d){return ALL.every(k=>d[k]);}
-function calcDiaHoje(){
-  if(!state.startDate)return 1;
-  const a=new Date(state.startDate+'T00:00:00'), b=new Date(); b.setHours(0,0,0,0);
-  return Math.min(TOTAL,Math.max(1,Math.floor((b-a)/864e5)+1));
-}
-function streak(){
-  let n=diaHoje; while(n>=1&&!isCompleto(getD(n)))n--;
-  let s=0; while(n>=1&&isCompleto(getD(n))){s++;n--;}
-  return s;
-}
-
-let state=load();
-if(!state.startDate){state.startDate=todayStr();save();}
-let diaHoje=calcDiaHoje(), dia=diaHoje;
-
-/* ===== RENDER ===== */
-function chk(id,ic,t,on){
-  return '<label class="chk'+(on?' on':'')+'"><input type="checkbox" data-k="'+id+'"'+(on?' checked':'')+'><span class="box">✓</span><span class="t">'+t+'</span><span class="ic">'+ic+'</span></label>';
-}
-function renderGrid(){
-  let h='';
-  for(let n=1;n<=TOTAL;n++){
-    const c=['chip'];
-    if(isCompleto(getD(n)))c.push('c');
-    if(n===diaHoje)c.push('hoje');
-    if(n===dia)c.push('sel');
-    h+='<button class="'+c.join(' ')+'" data-n="'+n+'">'+n+'</button>';
-  }
-  grid.innerHTML=h;
-}
-function updSaldo(){
-  const d=getD(dia), g=parseFloat(d.gasto)||0, c=parseFloat(d.consumo)||0;
-  const el=$('saldo');
-  if(!d.gasto&&!d.consumo){el.innerHTML='';return;}
-  const s=g-c, f=x=>x.toLocaleString('pt-BR');
-  if(s>0)el.innerHTML='Saldo: <b class="pos">déficit de '+f(s)+' kcal</b> 🔥';
-  else if(s<0)el.innerHTML='Saldo: <b class="neg">superávit de '+f(-s)+' kcal</b>';
-  else el.innerHTML='Saldo: equilíbrio';
-}
-function updBanner(){
-  const ok=isCompleto(getD(dia));
-  banner.classList.toggle('on',ok);
-  if(ok)banner.textContent='🏆 DIA '+dia+' CONQUISTADO — TODOS OS OBJETIVOS CUMPRIDOS!';
-}
-function renderDia(){
-  const d=getD(dia);
-  $('gasto').value=d.gasto; $('consumo').value=d.consumo;
-  $('chkTreino').innerHTML=chk('treino','🏋️','Treino feito',d.treino);
-  $('chkMente').innerHTML=MENTE.map(m=>chk(m.id,m.ic,m.t,d[m.id])).join('');
-  updSaldo(); updBanner();
-}
-function renderStats(){
-  let v=0; for(let n=1;n<=TOTAL;n++)if(isCompleto(getD(n)))v++;
-  $('stDia').textContent=diaHoje;
-  $('stVerdes').textContent=v;
-  $('stSeq').textContent=streak();
-  $('barFill').style.width=(v/TOTAL*100)+'%';
-  diaLabel.textContent='DIA '+dia;
-  $('prev').disabled=dia<=1; $('next').disabled=dia>=TOTAL;
-}
-function renderAll(){renderGrid();renderDia();renderStats();}
-
-/* ===== EVENTOS ===== */
-grid.addEventListener('click',e=>{
-  const b=e.target.closest('.chip'); if(!b)return;
-  dia=+b.dataset.n; renderAll();
-  if(window.innerWidth<700)$('editor').scrollIntoView({behavior:'smooth',block:'start'});
-});
-$('prev').onclick=()=>{if(dia>1){dia--;renderAll();}};
-$('next').onclick=()=>{if(dia<TOTAL){dia++;renderAll();}};
-document.addEventListener('keydown',e=>{
-  if(['INPUT','TEXTAREA'].includes(document.activeElement.tagName))return;
-  if(e.key==='ArrowLeft'&&dia>1){dia--;renderAll();}
-  if(e.key==='ArrowRight'&&dia<TOTAL){dia++;renderAll();}
-});
-document.addEventListener('change',e=>{
-  if(e.target.matches('.chk input')){
-    const d=getD(dia); d[e.target.dataset.k]=e.target.checked; setD(dia,d);
-    renderDia(); renderGrid(); renderStats();
-  }
-});
-$('gasto').addEventListener('input',e=>{const d=getD(dia);d.gasto=e.target.value;setD(dia,d);updSaldo();renderGrid();renderStats();});
-$('consumo').addEventListener('input',e=>{const d=getD(dia);d.consumo=e.target.value;setD(dia,d);updSaldo();renderGrid();renderStats();});
-$('zerar').onclick=()=>{if(confirm('Zerar os dados do dia '+dia+'?')){setD(dia,emptyDay());renderAll();}};
-$('inicio').value=state.startDate;
-$('inicio').addEventListener('change',e=>{
-  state.startDate=e.target.value||todayStr(); save();
-  diaHoje=calcDiaHoje(); dia=diaHoje; renderAll();
-});
-$('exp').onclick=()=>{
-  const a=document.createElement('a');
-  a.href=URL.createObjectURL(new Blob([JSON.stringify(state,null,2)],{type:'application/json'}));
-  a.download='projeto100-backup.json'; a.click();
-};
-$('imp').onclick=()=>$('file').click();
-$('file').addEventListener('change',e=>{
-  const f=e.target.files[0]; if(!f)return;
-  const r=new FileReader();
-  r.onload=()=>{try{
-      const p=JSON.parse(r.result);
-      if(!p||!p.days)throw 0;
-      state={startDate:p.startDate||todayStr(),days:p.days}; save();
-      $('inicio').value=state.startDate;
-      diaHoje=calcDiaHoje(); dia=diaHoje; renderAll();
-      alert('Backup importado com sucesso! ✅');
-    }catch(_){alert('Arquivo inválido.');}};
-  r.readAsText(f);
-});
-$('zap').onclick=()=>{if(confirm('Apagar TODO o progresso (100 dias)?')){state.days={};save();renderAll();}};
-document.addEventListener('visibilitychange',()=>{if(!document.hidden){diaHoje=calcDiaHoje();renderAll();}});
-
-renderAll();
-</script>
-</body>
-</html>
+// Cálculo do dia atual baseado na data de início
+const inicioData = new Date(state.startDate + 'T00:00:00');
+const hojeData = new Date(); hojeData.setHours(0,0,0,0);
+let diaHoje = Math.min(TOTAL,
