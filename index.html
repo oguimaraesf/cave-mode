@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <meta name="theme-color" content="#050505" />
-<title>PROJETO 100 — Dashboard</title>
+<title>PROJETO 100 — Foco & Resiliência</title>
 
 <style>
   :root {
@@ -14,113 +14,108 @@
     --blue: #3b82f6; --purple: #a855f7;
   }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-  html, body { margin: 0; padding: 0; }
+  html, body { margin: 0; padding: 0; scroll-behavior: smooth; }
   body {
     background: var(--bg); color: var(--txt);
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     min-height: 100vh; padding-bottom: 48px;
   }
-  .wrap { max-width: 800px; margin: 0 auto; padding: 14px; display: flex; flex-direction: column; gap: 16px; }
+  .wrap { max-width: 780px; margin: 0 auto; padding: 14px; display: flex; flex-direction: column; gap: 14px; }
 
   /* ===== CABEÇALHO ===== */
-  .top { text-align: center; padding: 10px 0 0; }
-  h1 { font-size: clamp(24px, 5vw, 32px); letter-spacing: 4px; margin: 0; font-weight: 900; text-transform: uppercase; }
-  h2.section-title { font-size: 11px; letter-spacing: 2px; color: var(--mut); text-transform: uppercase; margin: 0 0 10px 0; }
+  .top { text-align: center; padding: 12px 0 4px; }
+  h1 { font-size: clamp(24px, 5vw, 32px); letter-spacing: 5px; margin: 0; font-weight: 900; }
+  h1 .n { color: var(--grn); }
+  .sub { color: var(--mut); letter-spacing: 3px; font-size: 10px; text-transform: uppercase; margin-top: 6px; }
 
   /* ===== CARTÕES ===== */
   .card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 16px; }
-  
-  /* ===== TABELAS DOS DASHBOARDS ===== */
+  .section-title { font-size: 11px; letter-spacing: 2px; color: var(--mut); text-transform: uppercase; margin: 0 0 10px 0; font-weight: 800; display: flex; justify-content: space-between; align-items: center; }
+
+  /* ===== TABELAS (DASHBOARD) ===== */
   .table-box {
-    max-height: 220px;
+    max-height: 190px;
     overflow-y: auto;
     overflow-x: auto;
     border: 1px solid var(--line);
     border-radius: 10px;
     background: var(--card2);
   }
-  .table-box::-webkit-scrollbar { width: 6px; height: 6px; }
+  .table-box::-webkit-scrollbar { width: 5px; height: 5px; }
   .table-box::-webkit-scrollbar-thumb { background: #2c2c34; border-radius: 4px; }
   
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 12px;
-    text-align: center;
-    white-space: nowrap;
-  }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; text-align: center; white-space: nowrap; }
   th {
-    position: sticky;
-    top: 0;
-    background: #18181f;
-    color: var(--mut);
-    padding: 9px 8px;
-    font-size: 10px;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    border-bottom: 1px solid var(--line);
+    position: sticky; top: 0;
+    background: #18181f; color: var(--mut);
+    padding: 8px; font-size: 10px; letter-spacing: 1px;
+    text-transform: uppercase; border-bottom: 1px solid var(--line);
     z-index: 2;
   }
-  td {
-    padding: 8px 6px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-    color: var(--txt);
-  }
+  td { padding: 7px 6px; border-bottom: 1px solid rgba(255, 255, 255, 0.04); color: var(--txt); }
   tbody tr { cursor: pointer; transition: background 0.15s; }
-  tbody tr:hover { background: rgba(255, 255, 255, 0.05); }
-  tbody tr.active-row {
-    background: rgba(34, 197, 94, 0.12);
-    font-weight: 700;
-  }
+  tbody tr:hover { background: rgba(255, 255, 255, 0.06); }
+  tbody tr.active-row { background: rgba(34, 197, 94, 0.15); font-weight: 700; }
   .saldo-pos { color: var(--grn); font-weight: 700; }
   .saldo-neg { color: var(--red); font-weight: 700; }
   .sleep-tag { color: var(--purple); font-weight: 700; }
 
-  /* ===== ESTATÍSTICAS ===== */
-  .stats-row { display: flex; gap: 10px; }
+  /* ===== CARDS DE ESTATÍSTICAS ===== */
+  .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
   .stat-box { 
-    flex: 1; background: var(--card2); border: 1px solid var(--line); 
-    border-radius: 12px; padding: 16px 10px; text-align: center; 
+    background: var(--card); border: 1px solid var(--line); 
+    border-radius: 14px; padding: 14px 8px; text-align: center; 
   }
-  .stat-box h4 { margin: 0 0 8px; font-size: 9px; color: var(--mut); letter-spacing: 1px; text-transform: uppercase; }
-  .stat-box span { display: block; font-size: 18px; font-weight: 900; }
+  .stat-box h4 { margin: 0 0 6px; font-size: 9px; color: var(--mut); letter-spacing: 1px; text-transform: uppercase; }
+  .stat-box span { display: block; font-size: 20px; font-weight: 900; }
   .stat-box span.highlight { color: var(--grn); }
 
-  /* ===== GRID 100 DIAS ===== */
-  .grid-wrap { padding: 16px; border-radius: 16px; border: 1px solid var(--line); background: var(--card); }
+  /* ===== GRADE 100 DIAS ===== */
+  .grid-wrap { padding: 14px; border-radius: 16px; border: 1px solid var(--line); background: var(--card); }
   .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(32px, 1fr)); gap: 6px; }
   .chip { 
     aspect-ratio: 1; border-radius: 8px; border: 1px solid var(--line); 
     background: var(--card2); color: var(--mut); font-size: 10px; font-weight: 800; 
     cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0;
   }
-  .chip.hoje { border-color: var(--amb); }
+  .chip.hoje { border-color: var(--amb); color: #fff; }
   .chip.sel { outline: 2px solid #fff; outline-offset: 2px; }
   .chip.c { background: var(--grn2); border-color: var(--grn); color: #03130a; }
 
   /* ===== FORMULÁRIO DO DIA ===== */
-  .navrow { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; background: var(--card2); padding: 8px; border-radius: 12px; border: 1px solid var(--line); }
-  .dia-atual { font-weight: 900; font-size: 16px; letter-spacing: 2px; }
-  .btn { background: var(--card); border: 1px solid var(--line); color: var(--txt); border-radius: 8px; padding: 6px 16px; font-size: 14px; cursor: pointer; font-weight: 700; }
-  .btn:active { transform: scale(0.95); }
-  
-  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
-  .field { background: var(--card2); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; }
-  .field label { display: block; font-size: 9px; color: var(--mut); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px; font-weight: 700; }
-  .field input { width: 100%; background: transparent; border: none; outline: none; color: var(--txt); font-size: 18px; font-weight: 900; padding: 0; }
-  .field input::placeholder { color: #3a3a42; }
+  .card-form { border: 2px solid rgba(34, 197, 94, 0.4); background: #0f1211; }
+  .navrow { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; background: var(--card2); padding: 8px; border-radius: 12px; border: 1px solid var(--line); }
+  .dia-atual { font-weight: 900; font-size: 16px; letter-spacing: 2px; color: var(--grn); }
+  .btn { background: var(--card); border: 1px solid var(--line); color: var(--txt); border-radius: 8px; padding: 6px 14px; font-size: 13px; cursor: pointer; font-weight: 700; }
+  .btn:active { transform: scale(0.96); }
+  .btn:disabled { opacity: 0.3; cursor: default; }
 
-  .checks-row { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
-  .chk { display: flex; align-items: center; gap: 12px; background: var(--card2); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; cursor: pointer; user-select: none; transition: 0.2s; }
+  .checks-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 8px; margin-bottom: 14px; }
+  .chk { display: flex; align-items: center; gap: 10px; background: var(--card2); border: 1px solid var(--line); border-radius: 10px; padding: 11px 12px; cursor: pointer; user-select: none; transition: 0.2s; }
   .chk input { display: none; }
-  .box { width: 20px; height: 20px; border-radius: 6px; border: 2px solid #3a3a42; flex: none; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 900; color: transparent; }
-  .chk.on { border-color: var(--grn); background: rgba(34,197,94,0.08); }
+  .box { width: 18px; height: 18px; border-radius: 5px; border: 2px solid #3a3a42; flex: none; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 900; color: transparent; }
+  .chk.on { border-color: var(--grn); background: rgba(34, 197, 94, 0.1); }
   .chk.on .box { background: var(--grn); border-color: var(--grn); color: #03130a; }
   .chk .t { flex: 1; font-size: 13px; font-weight: 600; }
+
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+  .field { background: var(--card2); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+  .field label { display: block; font-size: 9px; color: var(--mut); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 5px; font-weight: 700; }
+  .field input { width: 100%; background: transparent; border: none; outline: none; color: var(--txt); font-size: 18px; font-weight: 900; padding: 0; }
+  .field input::placeholder { color: #35353d; }
+
+  .saldo-banner { font-size: 12px; color: var(--mut); padding: 8px 12px; background: var(--card2); border-radius: 8px; border: 1px solid var(--line); margin-bottom: 10px; }
+  .saldo-banner b.pos { color: var(--grn); }
+  .saldo-banner b.neg { color: var(--red); }
+
+  .zerar-box { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; }
+  .zerar-box button { background: none; border: none; color: var(--mut); font-size: 11px; cursor: pointer; text-decoration: underline; padding: 0; }
 
   /* ===== AJUSTES ===== */
   .tools { display: flex; gap: 8px; justify-content: center; margin-top: 10px; flex-wrap: wrap; }
   .tools .btn { font-size: 11px; padding: 6px 12px; }
+  .setrow { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 10px; font-size: 12px; color: var(--mut); }
+  .setrow input[type=date] { background: var(--card2); border: 1px solid var(--line); color: var(--txt); border-radius: 8px; padding: 6px 10px; font-size: 12px; }
   .danger { color: var(--red); border-color: rgba(239,68,68,0.4); }
 </style>
 </head>
@@ -128,13 +123,17 @@
 
 <div class="wrap">
   <header class="top">
-    <h1>PROJETO 100</h1>
+    <h1>PROJETO <span class="n">100</span></h1>
+    <div class="sub">Foco • Disciplina • Resiliência</div>
   </header>
 
   <!-- DASHBOARD 1: TABELA DE DÉFICIT & SONO -->
   <section class="card">
-    <h2 class="section-title">Dashboard — Déficit Calórico & Sono</h2>
-    <div class="table-box" id="scrollTableCal">
+    <div class="section-title">
+      <span>Dashboard — Déficit Calórico & Sono</span>
+      <span style="font-size:9px;color:var(--mut)">(Clique na linha para editar o dia)</span>
+    </div>
+    <div class="table-box">
       <table>
         <thead>
           <tr>
@@ -152,8 +151,11 @@
 
   <!-- DASHBOARD 2: TABELA DE MACROS -->
   <section class="card">
-    <h2 class="section-title">Dashboard — Macronutrientes</h2>
-    <div class="table-box" id="scrollTableMac">
+    <div class="section-title">
+      <span>Dashboard — Macronutrientes</span>
+      <span style="font-size:9px;color:var(--mut)">(Clique na linha para editar o dia)</span>
+    </div>
+    <div class="table-box">
       <table>
         <thead>
           <tr>
@@ -169,7 +171,7 @@
     </div>
   </section>
 
-  <!-- ESTATÍSTICAS -->
+  <!-- CARDS DE ESTATÍSTICAS -->
   <div class="stats-row">
     <div class="stat-box">
       <h4>Dias Sem Doce</h4>
@@ -185,11 +187,392 @@
     </div>
   </div>
 
-  <!-- GRID 100 DIAS -->
+  <!-- GRADE 100 DIAS -->
   <div class="grid-wrap">
+    <div class="section-title">
+      <span>Visão dos 100 Dias</span>
+      <span style="font-size:9px;color:var(--mut)">Verde = Completo</span>
+    </div>
     <div class="grid" id="grid"></div>
   </div>
 
   <!-- FORMULÁRIO DO DIA -->
-  <section class="card" id="formCard">
-    <h2
+  <section class="card card-form" id="formCard">
+    <div class="section-title" style="color:var(--grn)">
+      <span>✏️ Formulário do Dia — Preenchimento</span>
+      <span id="statusSalvo" style="font-size:10px;color:var(--mut)">Auto-salvo ✓</span>
+    </div>
+
+    <div class="navrow">
+      <button class="btn" id="prev">← Dia Anterior</button>
+      <div class="dia-atual" id="diaLabel">DIA 1</div>
+      <button class="btn" id="next">Próximo Dia →</button>
+    </div>
+
+    <!-- HÁBITOS / CHECKS -->
+    <div class="checks-row">
+      <label class="chk" id="lblTreino">
+        <input type="checkbox" id="treino"><span class="box">✓</span><span class="t">🏋️ Treino feito</span>
+      </label>
+      <label class="chk" id="lblDoce">
+        <input type="checkbox" id="doce"><span class="box">✓</span><span class="t">🍬🚫 Sem doce</span>
+      </label>
+      <label class="chk" id="lblComp">
+        <input type="checkbox" id="comp"><span class="box">✓</span><span class="t">🧘‍♂️ Sem compulsão</span>
+      </label>
+    </div>
+
+    <!-- CALORIAS & ENERGIA -->
+    <div class="form-grid">
+      <div class="field"><label>🔥 Gasto calórico (kcal)</label><input type="number" id="gasto" inputmode="decimal" placeholder="0"></div>
+      <div class="field"><label>🍽️ Consumo calórico (kcal)</label><input type="number" id="consumo" inputmode="decimal" placeholder="0"></div>
+    </div>
+    <div class="saldo-banner" id="saldoBanner">Preencha o gasto e consumo para calcular o saldo.</div>
+
+    <!-- SONO & MACROS -->
+    <div class="form-grid">
+      <div class="field"><label>💤 Sleep Score (0-100)</label><input type="number" id="sleep" inputmode="numeric" placeholder="0" max="100"></div>
+      <div class="field"><label>🍞 Carboidratos (g)</label><input type="number" id="carbs" inputmode="decimal" placeholder="0"></div>
+      <div class="field"><label>🥩 Proteínas (g)</label><input type="number" id="prot" inputmode="decimal" placeholder="0"></div>
+      <div class="field"><label>🥑 Gorduras (g)</label><input type="number" id="fat" inputmode="decimal" placeholder="0"></div>
+    </div>
+
+    <div class="zerar-box">
+      <button id="zerarDia">zerar este dia</button>
+    </div>
+  </section>
+
+  <!-- AJUSTES & BACKUP -->
+  <section class="card">
+    <div class="section-title">Ajustes & Backup</div>
+    <div class="setrow">
+      <label>Início do projeto: <input type="date" id="inicioData"></label>
+    </div>
+    <div class="tools">
+      <button class="btn" id="exp">⬇ Exportar Backup</button>
+      <button class="btn" id="imp">⬆ Importar Backup</button>
+      <button class="btn danger" id="zap">Apagar Tudo</button>
+      <input type="file" id="file" accept=".json,application/json" hidden>
+    </div>
+  </section>
+</div>
+
+<script>
+const TOTAL = 100;
+const $ = id => document.getElementById(id);
+
+function todayStr() {
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+}
+
+function emptyDay() { 
+  return { 
+    treino: false, doce: false, comp: false, 
+    gasto: '', consumo: '', sleep: '', 
+    carbs: '', prot: '', fat: '' 
+  }; 
+}
+
+// Recupera dados com segurança (tenta todas as chaves anteriores para evitar perda de dados)
+function loadState() {
+  const keys = ['projeto100_v1', 'projeto100_v2', 'projeto100_v3'];
+  for (const k of keys) {
+    try {
+      const raw = localStorage.getItem(k);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed && (parsed.days || parsed.startDate)) {
+          return {
+            startDate: parsed.startDate || todayStr(),
+            days: parsed.days || {}
+          };
+        }
+      }
+    } catch(e) {}
+  }
+  return { startDate: todayStr(), days: {} };
+}
+
+let state = loadState();
+
+function saveState() {
+  localStorage.setItem('projeto100_v1', JSON.stringify(state));
+}
+
+function getD(n) { 
+  return Object.assign(emptyDay(), state.days[n] || {}); 
+}
+
+function setD(n, d) { 
+  state.days[n] = d; 
+  saveState(); 
+}
+
+function isDayComplete(d) {
+  return !!(d.treino && d.doce && d.comp);
+}
+
+// Cálculo robusto do dia atual (previne NaN)
+function calcDiaHoje() {
+  if (!state.startDate) return 1;
+  const a = new Date(state.startDate + 'T00:00:00');
+  if (isNaN(a.getTime())) return 1;
+  const b = new Date(); b.setHours(0, 0, 0, 0);
+  const diff = Math.floor((b - a) / 864e5) + 1;
+  return Math.min(TOTAL, Math.max(1, isNaN(diff) ? 1 : diff));
+}
+
+let diaHoje = calcDiaHoje();
+let diaSelecionado = diaHoje;
+
+// ================= RENDERIZAÇÃO =================
+function renderGrid() {
+  let html = '';
+  for (let n = 1; n <= TOTAL; n++) {
+    const d = getD(n);
+    const classes = ['chip'];
+    if (isDayComplete(d)) classes.push('c');
+    if (n === diaHoje) classes.push('hoje');
+    if (n === diaSelecionado) classes.push('sel');
+    html += `<button type="button" class="${classes.join(' ')}" data-n="${n}">${n}</button>`;
+  }
+  $('grid').innerHTML = html;
+}
+
+function renderStats() {
+  let doces = 0, comp = 0, deficitAcumulado = 0;
+  for (let n = 1; n <= TOTAL; n++) {
+    const d = getD(n);
+    if (d.doce) doces++;
+    if (d.comp) comp++;
+    if (d.gasto !== '' && d.consumo !== '') {
+      deficitAcumulado += (parseFloat(d.gasto) - parseFloat(d.consumo));
+    }
+  }
+  $('stDoce').textContent = `${doces}/${TOTAL}`;
+  $('stComp').textContent = `${comp}/${TOTAL}`;
+  
+  const defEl = $('stDeficit');
+  defEl.textContent = `${deficitAcumulado > 0 ? '+' : ''}${deficitAcumulado.toLocaleString('pt-BR')} kcal`;
+  defEl.style.color = deficitAcumulado >= 0 ? 'var(--grn)' : 'var(--red)';
+}
+
+function renderTables() {
+  let htmlCal = '';
+  let htmlMac = '';
+
+  for (let n = 1; n <= TOTAL; n++) {
+    const d = getD(n);
+    const isSel = n === diaSelecionado;
+    const rowClass = isSel ? 'class="active-row"' : '';
+
+    const g = parseFloat(d.gasto) || 0;
+    const c = parseFloat(d.consumo) || 0;
+    let saldoText = '-';
+    let saldoClass = '';
+
+    if (d.gasto !== '' || d.consumo !== '') {
+      const saldo = g - c;
+      if (saldo > 0) {
+        saldoText = `+${saldo.toLocaleString('pt-BR')} kcal`;
+        saldoClass = 'saldo-pos';
+      } else if (saldo < 0) {
+        saldoText = `${saldo.toLocaleString('pt-BR')} kcal`;
+        saldoClass = 'saldo-neg';
+      } else {
+        saldoText = '0 kcal';
+      }
+    }
+
+    const sleepText = d.sleep ? `<span class="sleep-tag">${d.sleep} pts</span>` : '-';
+
+    htmlCal += `
+      <tr ${rowClass} data-n="${n}">
+        <td><b>Dia ${n}</b></td>
+        <td>${d.gasto ? d.gasto + ' kcal' : '-'}</td>
+        <td>${d.consumo ? d.consumo + ' kcal' : '-'}</td>
+        <td class="${saldoClass}">${saldoText}</td>
+        <td>${sleepText}</td>
+      </tr>
+    `;
+
+    const carbs = parseFloat(d.carbs) || 0;
+    const prot = parseFloat(d.prot) || 0;
+    const fat = parseFloat(d.fat) || 0;
+    const totalMacroKcal = (carbs * 4) + (prot * 4) + (fat * 9);
+
+    htmlMac += `
+      <tr ${rowClass} data-n="${n}">
+        <td><b>Dia ${n}</b></td>
+        <td>${d.carbs ? d.carbs + 'g' : '-'}</td>
+        <td>${d.prot ? d.prot + 'g' : '-'}</td>
+        <td>${d.fat ? d.fat + 'g' : '-'}</td>
+        <td>${totalMacroKcal > 0 ? totalMacroKcal.toFixed(0) + ' kcal' : '-'}</td>
+      </tr>
+    `;
+  }
+
+  $('tbodyCal').innerHTML = htmlCal;
+  $('tbodyMac').innerHTML = htmlMac;
+}
+
+function syncCheck(id, lblId, val) {
+  const el = $(id), lbl = $(lblId);
+  el.checked = !!val;
+  val ? lbl.classList.add('on') : lbl.classList.remove('on');
+}
+
+function updateSaldoBanner(d) {
+  const el = $('saldoBanner');
+  if (d.gasto === '' && d.consumo === '') {
+    el.innerHTML = 'Preencha o gasto e consumo para calcular o saldo.';
+    return;
+  }
+  const g = parseFloat(d.gasto) || 0;
+  const c = parseFloat(d.consumo) || 0;
+  const s = g - c;
+  const f = Math.abs(s).toLocaleString('pt-BR');
+  if (s > 0) el.innerHTML = `Saldo: <b class="pos">déficit de ${f} kcal</b> 🔥`;
+  else if (s < 0) el.innerHTML = `Saldo: <b class="neg">superávit de ${f} kcal</b> ⚠️`;
+  else el.innerHTML = 'Saldo: equilíbrio exato (0 kcal)';
+}
+
+function renderForm() {
+  $('diaLabel').textContent = `DIA ${diaSelecionado}`;
+  $('prev').disabled = diaSelecionado <= 1;
+  $('next').disabled = diaSelecionado >= TOTAL;
+
+  const d = getD(diaSelecionado);
+  syncCheck('treino', 'lblTreino', d.treino);
+  syncCheck('doce', 'lblDoce', d.doce);
+  syncCheck('comp', 'lblComp', d.comp);
+
+  $('gasto').value = d.gasto;
+  $('consumo').value = d.consumo;
+  $('sleep').value = d.sleep;
+  $('carbs').value = d.carbs;
+  $('prot').value = d.prot;
+  $('fat').value = d.fat;
+
+  updateSaldoBanner(d);
+}
+
+function updateAll(keepFocus = false) {
+  renderGrid();
+  renderStats();
+  if (!keepFocus) renderForm();
+  renderTables();
+}
+
+// ================= EVENTOS =================
+function selectDay(n, scrollToEditor = true) {
+  diaSelecionado = Math.max(1, Math.min(TOTAL, n));
+  renderForm();
+  renderGrid();
+  renderTables();
+  if (scrollToEditor) {
+    $('formCard').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+}
+
+$('grid').addEventListener('click', e => {
+  const b = e.target.closest('.chip');
+  if (b) selectDay(+b.dataset.n);
+});
+
+['tbodyCal', 'tbodyMac'].forEach(id => {
+  $(id).addEventListener('click', e => {
+    const tr = e.target.closest('tr');
+    if (tr) selectDay(+tr.dataset.n);
+  });
+});
+
+$('prev').onclick = () => { if (diaSelecionado > 1) selectDay(diaSelecionado - 1, false); };
+$('next').onclick = () => { if (diaSelecionado < TOTAL) selectDay(diaSelecionado + 1, false); };
+
+function onFormChange() {
+  const d = getD(diaSelecionado);
+  d.treino = $('treino').checked; syncCheck('treino', 'lblTreino', d.treino);
+  d.doce = $('doce').checked; syncCheck('doce', 'lblDoce', d.doce);
+  d.comp = $('comp').checked; syncCheck('comp', 'lblComp', d.comp);
+
+  d.gasto = $('gasto').value;
+  d.consumo = $('consumo').value;
+  d.sleep = $('sleep').value;
+  d.carbs = $('carbs').value;
+  d.prot = $('prot').value;
+  d.fat = $('fat').value;
+
+  setD(diaSelecionado, d);
+  updateSaldoBanner(d);
+  renderGrid();
+  renderStats();
+  renderTables();
+}
+
+['treino', 'doce', 'comp'].forEach(id => $(id).addEventListener('change', onFormChange));
+['gasto', 'consumo', 'sleep', 'carbs', 'prot', 'fat'].forEach(id => $(id).addEventListener('input', onFormChange));
+
+$('zerarDia').onclick = () => {
+  if (confirm(`Deseja limpar todos os dados do Dia ${diaSelecionado}?`)) {
+    setD(diaSelecionado, emptyDay());
+    renderForm();
+    updateAll();
+  }
+};
+
+// Ajuste de Data
+$('inicioData').value = state.startDate;
+$('inicioData').addEventListener('change', e => {
+  state.startDate = e.target.value || todayStr();
+  saveState();
+  diaHoje = calcDiaHoje();
+  diaSelecionado = diaHoje;
+  updateAll();
+});
+
+// Exportar / Importar
+$('exp').onclick = () => {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' }));
+  a.download = `projeto100-backup-${todayStr()}.json`;
+  a.click();
+};
+
+$('imp').onclick = () => $('file').click();
+$('file').addEventListener('change', e => {
+  const f = e.target.files[0];
+  if (!f) return;
+  const r = new FileReader();
+  r.onload = () => {
+    try {
+      const p = JSON.parse(r.result);
+      if (!p || !p.days) throw 0;
+      state = { startDate: p.startDate || todayStr(), days: p.days };
+      saveState();
+      $('inicioData').value = state.startDate;
+      diaHoje = calcDiaHoje();
+      diaSelecionado = diaHoje;
+      updateAll();
+      alert('Backup importado com sucesso! ✅');
+    } catch (_) {
+      alert('Arquivo inválido ou corrompido.');
+    }
+  };
+  r.readAsText(f);
+});
+
+$('zap').onclick = () => {
+  if (confirm('Tem certeza que deseja apagar TODO o progresso de todos os 100 dias?')) {
+    state.days = {};
+    saveState();
+    updateAll();
+  }
+};
+
+// Inicialização
+updateAll();
+</script>
+</body>
+</html>
